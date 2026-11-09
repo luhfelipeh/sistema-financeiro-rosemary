@@ -133,12 +133,16 @@
         <!-- CONTEÚDO -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
 
-            <!-- BARRA GLOBAL DE FILTROS -->
+            <!-- BARRA GLOBAL -->
             <div class="bg-dark-card border border-gold-500/20 rounded-3xl p-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
-                <div class="w-full md:w-auto flex items-center gap-3">
-                    <div class="flex items-center gap-2 text-xs text-gold-400 font-bold uppercase tracking-wider">
-                        <i data-lucide="filter" class="w-4 h-4"></i> Filtro Global por Data
-                    </div>
+                <div class="w-full md:w-auto flex items-center gap-3 flex-wrap">
+                    <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 border border-gold-500/30">
+                        <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Despesas (XLSX)
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden">
+                    </label>
+                    <button onclick="exportDespesasModel()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 hover:text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4 text-gold-400"></i> Baixar Modelo Despesas
+                    </button>
                 </div>
 
                 <div class="w-full md:w-auto flex flex-wrap items-center gap-3">
@@ -193,31 +197,29 @@
 
             <!-- TAB 2: PRO-LABORE DIRETORIA -->
             <section id="tab-prolabore" class="tab-content hidden space-y-6">
-                <!-- Barra de Importação / Modelo Pro-Labore -->
-                <div class="bg-dark-card border border-gold-500/30 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
-                    <div class="flex items-center gap-2 text-xs font-bold text-gold-400">
-                        <i data-lucide="award" class="w-4 h-4"></i> Gestão de Pro-Labore via Planilha XLSX
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <label class="cursor-pointer bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 border border-gold-500/30 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                            <i data-lucide="file-up" class="w-4 h-4"></i> Importar Pro-Labore
-                            <input type="file" id="excel-prolabore-input" accept=".xlsx, .xls, .csv" class="hidden">
+                <!-- Barra de Ações Planilha Pro-Labore -->
+                <div class="bg-dark-card border border-gold-500/20 p-4 rounded-3xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow border border-gold-500/30">
+                            <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Pro-Labore (XLSX)
+                            <input type="file" id="prolabore-file-input" accept=".xlsx, .xls, .csv" class="hidden">
                         </label>
-                        <button onclick="exportProlaboreModel()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                        <button onclick="exportProlaboreModel()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
                             <i data-lucide="download" class="w-4 h-4 text-gold-400"></i> Baixar Modelo Pro-Labore
                         </button>
                     </div>
+                    <div class="text-xs text-zinc-400">Colunas: Diretoria/Beneficiario | Valor Pago (R$) | Mês de Referencia (Competência) | Data do Pagamento</div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 id="form-prolabore-title" class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <i data-lucide="award" class="w-4 h-4 text-gold-400"></i> Registrar Pro-Labore Manual
+                            <i data-lucide="award" class="w-4 h-4 text-gold-400"></i> Registrar Pro-Labore
                         </h3>
                         <form id="form-prolabore" class="space-y-4">
                             <input type="hidden" id="prolabore-edit-id">
                             <div>
-                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Diretoria / Beneficiário</label>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Diretoria / Beneficiario</label>
                                 <input type="text" id="prolabore-diretora" required placeholder="Nome da Diretora..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                             <div>
@@ -261,8 +263,8 @@
                                     <tr>
                                         <th class="p-3">Data</th>
                                         <th class="p-3">Competência</th>
-                                        <th class="p-3">Diretoria / Beneficiário</th>
-                                        <th class="p-3 text-right">Valor Pago (R$)</th>
+                                        <th class="p-3">Diretoria / Beneficiario</th>
+                                        <th class="p-3 text-right">Valor (R$)</th>
                                         <th class="p-3 text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -275,24 +277,8 @@
 
             <!-- TAB 3: DESPESAS & SAÍDAS -->
             <section id="tab-despesas" class="tab-content hidden space-y-6">
-                <!-- Barra de Importação / Modelo Despesas -->
-                <div class="bg-dark-card border border-gold-500/30 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
-                    <div class="flex items-center gap-2 text-xs font-bold text-gold-400">
-                        <i data-lucide="pie-chart" class="w-4 h-4"></i> Importação de Despesas via Planilha (Atualização Automática por Código)
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow border border-gold-500/30">
-                            <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Despesas
-                            <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden">
-                        </label>
-                        <button onclick="exportDespesasModel()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4 text-gold-400"></i> Baixar Modelo Despesas
-                        </button>
-                    </div>
-                </div>
-
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Formulário Manual -->
+                    <!-- Formulário de Lançamento Manual de Despesa -->
                     <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 id="form-despesa-title" class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                             <i data-lucide="plus-circle" class="w-4 h-4 text-gold-400"></i> Lançar Nova Despesa
@@ -305,11 +291,11 @@
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Data Vencimento</label>
+                                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Vencimento</label>
                                     <input type="date" id="desp-venc" required class="w-full bg-dark-input border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Data Pagamento</label>
+                                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Pagamento</label>
                                     <input type="date" id="desp-pag" class="w-full bg-dark-input border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
                                 </div>
                             </div>
@@ -345,12 +331,12 @@
                         </form>
                     </div>
 
-                    <!-- Tabela -->
+                    <!-- Tabela e Listagem de Despesas -->
                     <div class="lg:col-span-2 bg-dark-card border border-dark-border rounded-3xl p-6 shadow-xl space-y-4">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div>
                                 <h2 class="text-lg font-black text-white">Detalhamento de Saídas & Custos</h2>
-                                <p class="text-xs text-zinc-400">Gerenciamento completo</p>
+                                <p class="text-xs text-zinc-400">Colunas padrão: Código, Vencimento, Pagamento, Tipo, Descrição, Status, Valor</p>
                             </div>
                             <div class="relative w-full sm:w-64">
                                 <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-zinc-500"></i>
@@ -362,9 +348,9 @@
                                 <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
                                     <tr>
                                         <th class="p-3">Código</th>
-                                        <th class="p-3">Data Vencimento</th>
-                                        <th class="p-3">Data Pagamento</th>
-                                        <th class="p-3">Tipo de Despesa</th>
+                                        <th class="p-3">Vencimento</th>
+                                        <th class="p-3">Pagamento</th>
+                                        <th class="p-3">Tipo Despesa</th>
                                         <th class="p-3">Descrição</th>
                                         <th class="p-3">Status</th>
                                         <th class="p-3 text-right">Valor (R$)</th>
@@ -380,30 +366,28 @@
 
             <!-- TAB 4: ENTRADAS -->
             <section id="tab-entradas" class="tab-content hidden space-y-6">
-                <!-- Barra de Importação / Modelo Entradas -->
-                <div class="bg-dark-card border border-emerald-500/30 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
-                    <div class="flex items-center gap-2 text-xs font-bold text-emerald-400">
-                        <i data-lucide="arrow-down-left" class="w-4 h-4"></i> Gestão de Entradas via Planilha XLSX
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <label class="cursor-pointer bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                            <i data-lucide="file-up" class="w-4 h-4"></i> Importar Entradas
-                            <input type="file" id="excel-entrada-input" accept=".xlsx, .xls, .csv" class="hidden">
+                <!-- Barra de Ações Planilha Entradas -->
+                <div class="bg-dark-card border border-gold-500/20 p-4 rounded-3xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow border border-gold-500/30">
+                            <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Entradas (XLSX)
+                            <input type="file" id="entradas-file-input" accept=".xlsx, .xls, .csv" class="hidden">
                         </label>
-                        <button onclick="exportEntradasModel()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i> Baixar Modelo Entradas
+                        <button onclick="exportEntradasModel()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4 text-gold-400"></i> Baixar Modelo Entradas
                         </button>
                     </div>
+                    <div class="text-xs text-zinc-400">Colunas padrão: Valor | Referente A | Data</div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Lançar Entrada Manual
+                            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Lançar Entrada
                         </h3>
                         <form id="form-entrada" class="space-y-4">
                             <div>
-                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor</label>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor (R$)</label>
                                 <input type="number" step="0.01" id="entrada-valor" required placeholder="0.00" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                             <div>
@@ -422,12 +406,7 @@
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-left text-xs text-zinc-300">
                                 <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
-                                    <tr>
-                                        <th class="p-3">Data</th>
-                                        <th class="p-3">Referente A</th>
-                                        <th class="p-3 text-right">Valor</th>
-                                        <th class="p-3 text-center">Ações</th>
-                                    </tr>
+                                    <tr><th class="p-3">Data</th><th class="p-3">Referente A</th><th class="p-3 text-right">Valor (R$)</th><th class="p-3 text-center">Ações</th></tr>
                                 </thead>
                                 <tbody id="table-entradas-body" class="divide-y divide-dark-border"></tbody>
                             </table>
@@ -515,11 +494,11 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-zinc-400 mb-1">Data Vencimento</label>
+                        <label class="block text-xs text-zinc-400 mb-1">Vencimento</label>
                         <input type="date" id="edit-despesa-venc" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
                     </div>
                     <div>
-                        <label class="block text-xs text-zinc-400 mb-1">Data Pagamento</label>
+                        <label class="block text-xs text-zinc-400 mb-1">Pagamento</label>
                         <input type="date" id="edit-despesa-pag" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
                     </div>
                 </div>
@@ -581,6 +560,7 @@
                 }
             });
 
+            // Formulário Despesa Manual
             document.getElementById('form-despesa-manual').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const editId = document.getElementById('despesa-edit-id').value;
@@ -611,6 +591,7 @@
                 updateAll();
             });
 
+            // Formulário Pro-Labore
             document.getElementById('form-prolabore').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const editId = document.getElementById('prolabore-edit-id').value;
@@ -623,7 +604,14 @@
                     const idx = prolabores.findIndex(p => p.id == editId);
                     if (idx !== -1) prolabores[idx] = { id: Number(editId), diretora, valor, mes, data };
                 } else {
-                    prolabores.push({ id: Date.now(), diretora, valor, mes, data });
+                    // Evita duplicata se mesma diretora e mesmo mês de competência
+                    const existingIdx = prolabores.findIndex(p => p.diretora.toLowerCase() === diretora.toLowerCase() && p.mes.toLowerCase() === mes.toLowerCase());
+                    if (existingIdx !== -1) {
+                        prolabores[existingIdx].valor = valor;
+                        prolabores[existingIdx].data = data;
+                    } else {
+                        prolabores.push({ id: Date.now(), diretora, valor, mes, data });
+                    }
                 }
 
                 localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
@@ -631,12 +619,20 @@
                 updateAll();
             });
 
+            // Formulário Entradas Manual
             document.getElementById('form-entrada').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const valor = parseFloat(document.getElementById('entrada-valor').value);
                 const descricao = document.getElementById('entrada-descricao').value.trim();
                 const data = document.getElementById('entrada-data').value;
-                entradas.push({ id: Date.now(), valor, descricao, data });
+
+                const existingIdx = entradas.findIndex(en => en.descricao.toLowerCase() === descricao.toLowerCase() && en.data === data);
+                if (existingIdx !== -1) {
+                    entradas[existingIdx].valor = valor;
+                } else {
+                    entradas.push({ id: Date.now(), valor, descricao, data });
+                }
+
                 localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
                 document.getElementById('form-entrada').reset();
                 updateAll();
@@ -660,10 +656,10 @@
                 }
             });
 
-            // Listeners de Upload
-            document.getElementById('excel-file-input').addEventListener('change', handleDespesaUpload);
-            document.getElementById('excel-entrada-input').addEventListener('change', handleEntradaUpload);
-            document.getElementById('excel-prolabore-input').addEventListener('change', handleProlaboreUpload);
+            // Upload Listeners
+            document.getElementById('excel-file-input').addEventListener('change', handleDespesasUpload);
+            document.getElementById('entradas-file-input').addEventListener('change', handleEntradasUpload);
+            document.getElementById('prolabore-file-input').addEventListener('change', handleProlaboreUpload);
         });
 
         function initApp() {
@@ -769,7 +765,7 @@
                             <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPago ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${d.status || 'Pago'}</span></td>
                             <td class="p-3 text-right font-bold text-rose-400">${formatCurrency(d.valor)}</td>
                             <td class="p-3 text-center">
-                                <button onclick="openEditDespesaModal(${d.id})" class="text-zinc-400 hover:text-gold-400 mr-2" title="Editar"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                <button onclick="startEditDespesaForm(${d.id})" class="text-zinc-400 hover:text-gold-400 mr-2" title="Editar"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
                                 <button onclick="deleteDespesa(${d.id})" class="text-zinc-500 hover:text-rose-400" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                             </td>
                         </tr>
@@ -960,4 +956,254 @@
 
             document.getElementById('dir-kpi-entradas').textContent = formatCurrency(totalEntradas);
             document.getElementById('dir-kpi-prolabore').textContent = formatCurrency(totalProlabore);
-            document.getElementById('dir-kpi-sa
+            document.getElementById('dir-kpi-saidas').textContent = formatCurrency(totalSaidas);
+            document.getElementById('dir-kpi-resultado').textContent = formatCurrency(resultado);
+            document.getElementById('dir-kpi-resultado').className = `text-2xl font-black mt-1 ${resultado >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            const diretoraMap = {};
+            dProlabores.forEach(p => { diretoraMap[p.diretora] = (diretoraMap[p.diretora] || 0) + p.valor; });
+            if (charts.dirProl) charts.dirProl.destroy();
+            charts.dirProl = new Chart(document.getElementById('dir-chart-prolabore').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(diretoraMap).length ? Object.keys(diretoraMap) : ['Sem pro-labore'],
+                    datasets: [{ data: Object.values(diretoraMap).length ? Object.values(diretoraMap) : [1], backgroundColor: ['#eab308', '#7c3aed', '#3b82f6', '#10b981'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#a1a1aa' } } } }
+            });
+
+            if (charts.dirComp) charts.dirComp.destroy();
+            charts.dirComp = new Chart(document.getElementById('dir-chart-composicao').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Despesas Operacionais', 'Pro-Labore Diretoria'],
+                    datasets: [{ data: [totalSaidas, totalProlabore], backgroundColor: ['#7c3aed', '#eab308'], borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a1a1aa' } }, y: { ticks: { color: '#a1a1aa' } } } }
+            });
+        }
+
+        function formatDateVal(val) {
+            if (!val) return '';
+            if (val instanceof Date) {
+                const y = val.getFullYear();
+                const m = String(val.getMonth() + 1).padStart(2, '0');
+                const d = String(val.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            const s = String(val).trim();
+            if (s.includes('/')) {
+                const parts = s.split('/');
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) return `${parts[0]}-${parts[1]}-${parts[2]}`;
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+            return s.substring(0, 10);
+        }
+
+        // IMPORTAÇÃO DE DESPESAS (Com colunas padrão)
+        function handleDespesasUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                if (json.length < 2) return;
+
+                let atualizados = 0;
+                let novos = 0;
+
+                for (let i = 1; i < json.length; i++) {
+                    const row = json[i];
+                    if (!row || row.length === 0) continue;
+
+                    const codigo = String(row[0] || '').trim();
+                    const val = parseFloat(row[6]) || parseFloat(row[5]) || parseFloat(row[4]) || 0;
+                    if (val === 0 && !codigo) continue;
+
+                    const itemImportado = {
+                        codigo: codigo || `ITEM-${i}`,
+                        dataVencimento: formatDateVal(row[1]),
+                        dataPagamento: formatDateVal(row[2]),
+                        tipoDespesa: row[3] || 'Geral',
+                        descricao: row[4] || '',
+                        status: row[5] || 'Pago',
+                        valor: val
+                    };
+
+                    const indexExistente = despesas.findIndex(d => String(d.codigo).trim() === String(itemImportado.codigo).trim());
+
+                    if (indexExistente !== -1) {
+                        despesas[indexExistente].valor = itemImportado.valor;
+                        despesas[indexExistente].status = itemImportado.status;
+                        despesas[indexExistente].dataVencimento = itemImportado.dataVencimento || despesas[indexExistente].dataVencimento;
+                        despesas[indexExistente].dataPagamento = itemImportado.dataPagamento || despesas[indexExistente].dataPagamento;
+                        despesas[indexExistente].tipoDespesa = itemImportado.tipoDespesa || despesas[indexExistente].tipoDespesa;
+                        despesas[indexExistente].descricao = itemImportado.descricao || despesas[indexExistente].descricao;
+                        atualizados++;
+                    } else {
+                        despesas.push({ id: Date.now() + i, ...itemImportado });
+                        novos++;
+                    }
+                }
+
+                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                alert(`Despesas importadas!\n• ${novos} novos itens.\n• ${atualizados} itens atualizados.`);
+                updateAll();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // IMPORTAÇÃO DE ENTRADAS (Colunas: Valor, Referente A, Data)
+        function handleEntradasUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                if (json.length < 2) return;
+
+                let atualizados = 0;
+                let novos = 0;
+
+                for (let i = 1; i < json.length; i++) {
+                    const row = json[i];
+                    if (!row || row.length === 0) continue;
+
+                    const valor = parseFloat(row[0]) || 0;
+                    const descricao = String(row[1] || '').trim();
+                    const dataEntrada = formatDateVal(row[2]);
+
+                    if (valor === 0 && !descricao) continue;
+
+                    const existingIdx = entradas.findIndex(en => en.descricao.toLowerCase() === descricao.toLowerCase() && en.data === dataEntrada);
+
+                    if (existingIdx !== -1) {
+                        entradas[existingIdx].valor = valor;
+                        atualizados++;
+                    } else {
+                        entradas.push({ id: Date.now() + i, valor, descricao, data: dataEntrada });
+                        novos++;
+                    }
+                }
+
+                localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
+                alert(`Entradas importadas!\n• ${novos} novas entradas.\n• ${atualizados} entradas atualizadas.`);
+                updateAll();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // IMPORTAÇÃO DE PRO-LABORE (Colunas: Diretoria/Beneficiario, Valor Pago (R$), Mês de Referencia (Competência), Data do Pagamento)
+        function handleProlaboreUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                if (json.length < 2) return;
+
+                let atualizados = 0;
+                let novos = 0;
+
+                for (let i = 1; i < json.length; i++) {
+                    const row = json[i];
+                    if (!row || row.length === 0) continue;
+
+                    const diretora = String(row[0] || '').trim();
+                    const valor = parseFloat(row[1]) || 0;
+                    const mes = String(row[2] || 'Janeiro').trim();
+                    const dataPagamento = formatDateVal(row[3]);
+
+                    if (!diretora || valor === 0) continue;
+
+                    const existingIdx = prolabores.findIndex(p => p.diretora.toLowerCase() === diretora.toLowerCase() && p.mes.toLowerCase() === mes.toLowerCase());
+
+                    if (existingIdx !== -1) {
+                        prolabores[existingIdx].valor = valor;
+                        prolabores[existingIdx].data = dataPagamento || prolabores[existingIdx].data;
+                        atualizados++;
+                    } else {
+                        prolabores.push({ id: Date.now() + i, diretora, valor, mes, data: dataPagamento });
+                        novos++;
+                    }
+                }
+
+                localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
+                alert(`Pro-Labore importado!\n• ${novos} novos registros.\n• ${atualizados} registros atualizados.`);
+                updateAll();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // FUNÇÕES DE EXPORTAÇÃO / MODELOS
+        function exportDespesasModel() {
+            const dataToExport = despesas.length ? despesas.map(d => ({
+                'Código': d.codigo,
+                'Data Vencimento': d.dataVencimento,
+                'Data Pagamento': d.dataPagamento,
+                'Tipo de Despesa': d.tipoDespesa,
+                'Descrição': d.descricao,
+                'Status': d.status,
+                'Valor (R$)': d.valor
+            })) : [{
+                'Código': '01',
+                'Data Vencimento': '2026-01-10',
+                'Data Pagamento': '2026-01-10',
+                'Tipo de Despesa': 'Operacional',
+                'Descrição': 'Exemplo de Despesa',
+                'Status': 'Pago',
+                'Valor (R$)': 1500.00
+            }];
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Despesas");
+            XLSX.writeFile(wb, "Modelo_Despesas_Rosemary.xlsx");
+        }
+
+        function exportEntradasModel() {
+            const dataToExport = entradas.length ? entradas.map(e => ({
+                'Valor': e.valor,
+                'Referente A': e.descricao,
+                'Data': e.data
+            })) : [{
+                'Valor': 5000.00,
+                'Referente A': 'Faturamento Exemplo',
+                'Data': '2026-01-05'
+            }];
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Entradas");
+            XLSX.writeFile(wb, "Modelo_Entradas_Rosemary.xlsx");
+        }
+
+        function exportProlaboreModel() {
+            const dataToExport = prolabores.length ? prolabores.map(p => ({
+                'Diretoria/Beneficiario': p.diretora,
+                'Valor Pago (R$)': p.valor,
+                'Mês de Referencia (Competência)': p.mes,
+                'Data do Pagamento': p.data
+            })) : [{
+                'Diretoria/Beneficiario': 'Rosemary Diretora',
+                'Valor Pago (R$)': 8000.00,
+                'Mês de Referencia (Competência)': 'Janeiro',
+                'Data do Pagamento': '2026-01-05'
+            }];
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ProLabore");
+            XLSX.writeFile(wb, "Modelo_Prolabore_Rosemary.xlsx");
+        }
+    </script>
+</body>
+</html>
