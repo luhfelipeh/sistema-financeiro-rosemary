@@ -532,10 +532,14 @@
 
     <!-- SCRIPT -->
     <script>
-        const MASTER_EMAIL = "admin@rosemary.com.br";
+        const MASTER_EMAILS = ["admin@rosemary.com.br", "administrativo@stanize.com.br"];
         const MASTER_PASS = "Lacan1404@";
 
-        let users = JSON.parse(localStorage.getItem('rosemary_users')) || [{ email: MASTER_EMAIL, pass: MASTER_PASS, role: 'MASTER' }];
+        let users = JSON.parse(localStorage.getItem('rosemary_users')) || [
+            { email: "admin@rosemary.com.br", pass: MASTER_PASS, role: 'MASTER' },
+            { email: "administrativo@stanize.com.br", pass: MASTER_PASS, role: 'MASTER' }
+        ];
+        
         let currentUser = null;
         let despesas = JSON.parse(localStorage.getItem('rosemary_despesas')) || [];
         let entradas = JSON.parse(localStorage.getItem('rosemary_entradas')) || [];
@@ -604,7 +608,6 @@
                     const idx = prolabores.findIndex(p => p.id == editId);
                     if (idx !== -1) prolabores[idx] = { id: Number(editId), diretora, valor, mes, data };
                 } else {
-                    // Evita duplicata se mesma diretora e mesmo mês de competência
                     const existingIdx = prolabores.findIndex(p => p.diretora.toLowerCase() === diretora.toLowerCase() && p.mes.toLowerCase() === mes.toLowerCase());
                     if (existingIdx !== -1) {
                         prolabores[existingIdx].valor = valor;
@@ -1002,7 +1005,7 @@
             return s.substring(0, 10);
         }
 
-        // IMPORTAÇÃO DE DESPESAS (Com colunas padrão)
+        // IMPORTAÇÃO DE DESPESAS
         function handleDespesasUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1058,7 +1061,7 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // IMPORTAÇÃO DE ENTRADAS (Colunas: Valor, Referente A, Data)
+        // IMPORTAÇÃO DE ENTRADAS
         function handleEntradasUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1101,7 +1104,7 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // IMPORTAÇÃO DE PRO-LABORE (Colunas: Diretoria/Beneficiario, Valor Pago (R$), Mês de Referencia (Competência), Data do Pagamento)
+        // IMPORTAÇÃO DE PRO-LABORE
         function handleProlaboreUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1146,7 +1149,6 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // FUNÇÕES DE EXPORTAÇÃO / MODELOS
         function exportDespesasModel() {
             const dataToExport = despesas.length ? despesas.map(d => ({
                 'Código': d.codigo,
