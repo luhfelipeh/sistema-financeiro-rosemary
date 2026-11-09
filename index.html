@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rosemary - Gestão Financeira & Pro-Labore</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        gold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        },
+                        dark: {
+                            bg: '#0f0c1b',
+                            card: '#18132d',
+                            border: '#2e2453',
+                            input: '#221940',
+                            hover: '#3b2f6b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0f0c1b; color: #f4f4f5; font-family: system-ui, -apple-system, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #18132d; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b2f6b; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-dark-bg px-4">
+        <div class="bg-dark-card border border-gold-500/30 p-8 rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-gold-500/10 rounded-full blur-3xl"></div>
+            <div class="text-center mb-8">
+                <div class="inline-flex p-3 rounded-2xl bg-gold-500/10 text-gold-400 mb-3 border border-gold-500/30 shadow-lg shadow-gold-500/5">
+                    <i data-lucide="crown" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-white">Rosemary Financeiro</h1>
+                <p class="text-xs text-gold-400 uppercase tracking-widest mt-1 font-semibold">Gestão & Pro-Labore</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">E-mail</label>
+                    <input type="email" id="login-email" required class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-gold-500 transition" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">Senha</label>
+                    <input type="password" id="login-password" required class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-gold-500 transition" placeholder="••••••••">
+                </div>
+                <div id="login-error" class="hidden text-xs text-rose-400 font-medium bg-rose-500/10 p-3 rounded-lg border border-rose-500/20 text-center"></div>
+                <button type="submit" class="w-full bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white font-bold py-3.5 rounded-xl transition duration-200 shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 border border-gold-500/30">
+                    <i data-lucide="log-in" class="w-4 h-4 text-gold-400"></i> Entrar no Sistema
+                </button>
+            </form>
+            <div class="mt-6 text-center text-xs text-zinc-500">
+                Acesso Seguro • Rosemary 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- ESTRUTURA PRINCIPAL -->
+    <div id="app" class="hidden flex-1 flex flex-col">
+        <!-- HEADER -->
+        <header class="bg-dark-card border-b border-dark-border sticky top-0 z-40 shadow-xl shadow-black/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl text-gold-400 shadow-md border border-gold-500/30">
+                        <i data-lucide="crown" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="font-black text-xl text-white tracking-wide">Rosemary</span>
+                        <span class="text-[10px] text-gold-400 font-bold block uppercase tracking-widest">Gestão & Pro-Labore</span>
+                    </div>
+                </div>
+
+                <!-- MENU NAVEGAÇÃO -->
+                <nav class="hidden md:flex items-center gap-1.5 bg-dark-bg p-1.5 rounded-2xl border border-dark-border shadow-inner">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-white bg-dark-card shadow border border-gold-500/20">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-gold-400"></i> Visão Geral
+                    </button>
+                    <button onclick="switchTab('prolabore')" id="nav-prolabore" class="nav-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-zinc-400 hover:text-white">
+                        <i data-lucide="award" class="w-4 h-4 text-gold-400"></i> Pro-Labore Diretoria
+                    </button>
+                    <button onclick="switchTab('despesas')" id="nav-despesas" class="nav-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-zinc-400 hover:text-white">
+                        <i data-lucide="pie-chart" class="w-4 h-4"></i> Despesas & Saídas
+                    </button>
+                    <button onclick="switchTab('entradas')" id="nav-entradas" class="nav-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-zinc-400 hover:text-white">
+                        <i data-lucide="arrow-down-left" class="w-4 h-4"></i> Entradas
+                    </button>
+                    <button onclick="switchTab('diretoria')" id="nav-diretoria" class="nav-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-zinc-400 hover:text-white">
+                        <i data-lucide="presentation" class="w-4 h-4"></i> Dashboard Executivo
+                    </button>
+                </nav>
+
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <div id="user-display-email" class="text-xs font-bold text-white">admin@rosemary.com.br</div>
+                        <div id="user-display-role" class="text-[10px] text-gold-400 font-extrabold uppercase tracking-wider">Diretoria Master</div>
+                    </div>
+                    <button onclick="logout()" class="p-2.5 text-zinc-400 hover:text-rose-400 bg-dark-bg border border-dark-border rounded-xl transition shadow" title="Sair">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTEÚDO -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+
+            <!-- BARRA GLOBAL -->
+            <div class="bg-dark-card border border-gold-500/20 rounded-3xl p-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
+                <div class="w-full md:w-auto flex items-center gap-3 flex-wrap">
+                    <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 border border-gold-500/30">
+                        <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Planilha (XLSX)
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden">
+                    </label>
+                    <button onclick="exportData()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 hover:text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4 text-gold-400"></i> Baixar Modelo
+                    </button>
+                </div>
+
+                <div class="w-full md:w-auto flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2 bg-dark-bg border border-dark-border px-4 py-2 rounded-2xl">
+                        <i data-lucide="calendar" class="w-4 h-4 text-gold-400"></i>
+                        <span class="text-xs text-zinc-400">De:</span>
+                        <input type="date" id="filter-start-date" class="bg-transparent text-xs text-white focus:outline-none">
+                        <span class="text-xs text-zinc-400">Até:</span>
+                        <input type="date" id="filter-end-date" class="bg-transparent text-xs text-white focus:outline-none">
+                    </div>
+                    <button onclick="updateAll()" class="bg-gold-500 hover:bg-gold-600 text-dark-bg text-xs font-extrabold px-5 py-3 rounded-2xl transition shadow-lg shadow-gold-500/20">Filtrar</button>
+                    <button onclick="clearDateFilter()" class="text-xs text-zinc-400 hover:text-white underline">Limpar</button>
+                </div>
+            </div>
+
+            <!-- TAB 1: VISÃO GERAL -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
+                        <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Entradas</div>
+                        <div id="kpi-entradas" class="text-2xl font-black text-emerald-400">R$ 0,00</div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl"></div>
+                        <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Saídas & Custos</div>
+                        <div id="kpi-saidas" class="text-2xl font-black text-rose-400">R$ 0,00</div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gold-500/5 rounded-full blur-2xl"></div>
+                        <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Pro-Labore Pago</div>
+                        <div id="kpi-prolabore" class="text-2xl font-black text-gold-400">R$ 0,00</div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full blur-2xl"></div>
+                        <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Saldo Líquido Real</div>
+                        <div id="kpi-saldo" class="text-2xl font-black text-white">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 text-gold-400"></i> Fluxo Mensal (Entradas vs Saídas & Pro-Labore)
+                        </h3>
+                        <div class="h-80"><canvas id="chart-fluxo-mensal"></canvas></div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-gold-400"></i> Gastos por Categoria
+                        </h3>
+                        <div class="h-80 flex items-center justify-center"><canvas id="chart-tipo-despesa"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: PRO-LABORE DIRETORIA -->
+            <section id="tab-prolabore" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
+                        <h3 id="form-prolabore-title" class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="award" class="w-4 h-4 text-gold-400"></i> Registrar Pro-Labore
+                        </h3>
+                        <form id="form-prolabore" class="space-y-4">
+                            <input type="hidden" id="prolabore-edit-id">
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Diretora / Beneficiária</label>
+                                <input type="text" id="prolabore-diretora" required placeholder="Nome da Diretora..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor Pago (R$)</label>
+                                <input type="number" step="0.01" id="prolabore-valor" required placeholder="0.00" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Mês de Referência (Competência)</label>
+                                <select id="prolabore-mes" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
+                                    <option value="Janeiro">Janeiro</option><option value="Fevereiro">Fevereiro</option><option value="Março">Março</option>
+                                    <option value="Abril">Abril</option><option value="Maio">Maio</option><option value="Junho">Junho</option>
+                                    <option value="Julho">Julho</option><option value="Agosto">Agosto</option><option value="Setembro">Setembro</option>
+                                    <option value="Outubro">Outubro</option><option value="Novembro">Novembro</option><option value="Dezembro">Dezembro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Data do Pagamento</label>
+                                <input type="date" id="prolabore-data" required class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                            <div class="flex gap-2 pt-2">
+                                <button type="submit" id="btn-salvar-prolabore" class="flex-1 bg-gold-500 hover:bg-gold-600 text-dark-bg font-extrabold py-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-gold-500/20">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Salvar Pro-Labore
+                                </button>
+                                <button type="button" id="btn-cancelar-prolabore" onclick="cancelEditProlabore()" class="hidden bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold px-4 py-3 rounded-xl transition text-xs">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Histórico de Pro-Labore Pagos à Diretoria</h3>
+                            <div class="text-xs font-bold text-gold-400 bg-gold-500/10 px-3 py-1.5 rounded-xl border border-gold-500/20">
+                                Total: <span id="prolabore-total-badge">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs text-zinc-300">
+                                <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
+                                    <tr>
+                                        <th class="p-3">Data</th>
+                                        <th class="p-3">Competência</th>
+                                        <th class="p-3">Diretora</th>
+                                        <th class="p-3 text-right">Valor (R$)</th>
+                                        <th class="p-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-prolabore-body" class="divide-y divide-dark-border"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: DESPESAS -->
+            <section id="tab-despesas" class="tab-content hidden space-y-6">
+                <div class="bg-dark-card border border-dark-border rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-black text-white">Detalhamento de Saídas & Custos</h2>
+                            <p class="text-xs text-zinc-400">Gerencie despesas operacionais da empresa</p>
+                        </div>
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-zinc-500"></i>
+                            <input type="text" id="search-despesas" oninput="renderTables()" placeholder="Buscar..." class="w-full bg-dark-bg border border-dark-border rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs text-zinc-300">
+                            <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
+                                <tr>
+                                    <th class="p-3">Vencimento</th>
+                                    <th class="p-3">Pagamento</th>
+                                    <th class="p-3">Tipo Despesa</th>
+                                    <th class="p-3">Descrição</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Valor (R$)</th>
+                                    <th class="p-3 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-despesas-body" class="divide-y divide-dark-border"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: ENTRADAS -->
+            <section id="tab-entradas" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl space-y-4">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Lançar Entrada
+                        </h3>
+                        <form id="form-entrada" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor (R$)</label>
+                                <input type="number" step="0.01" id="entrada-valor" required placeholder="0.00" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Referente a</label>
+                                <input type="text" id="entrada-descricao" required placeholder="Descrição..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Data</label>
+                                <input type="date" id="entrada-data" required class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-xs shadow-lg shadow-emerald-600/20">Salvar Entrada</button>
+                        </form>
+                    </div>
+                    <div class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Créditos Registrados</h3>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs text-zinc-300">
+                                <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
+                                    <tr><th class="p-3">Data</th><th class="p-3">Referência</th><th class="p-3 text-right">Valor (R$)</th><th class="p-3 text-center">Ações</th></tr>
+                                </thead>
+                                <tbody id="table-entradas-body" class="divide-y divide-dark-border"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: DIRETORIA & DASHBOARD EXECUTIVO -->
+            <section id="tab-diretoria" class="tab-content hidden space-y-6">
+                <div class="bg-gradient-to-r from-brand-950 via-dark-card to-brand-900/40 border border-gold-500/30 p-8 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-2xl">
+                    <div class="space-y-2">
+                        <span class="px-3 py-1 bg-gold-500/20 text-gold-400 border border-gold-500/30 rounded-full text-xs font-bold uppercase tracking-wider">Painel Executivo Rosemary</span>
+                        <h2 class="text-3xl font-black text-white">Análise de Performance & Pro-Labore</h2>
+                        <p class="text-zinc-300 text-sm">Acompanhe o impacto dos repasses da diretoria frente ao faturamento e despesas.</p>
+                    </div>
+
+                    <div class="bg-dark-bg border border-dark-border p-3 rounded-2xl flex items-center gap-3">
+                        <i data-lucide="filter" class="w-5 h-5 text-gold-400"></i>
+                        <div>
+                            <label class="block text-[10px] font-bold text-zinc-400 uppercase">Mês de Análise</label>
+                            <select id="dir-month-select" onchange="updateDiretoria()" class="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-4">
+                                <option value="all" class="bg-dark-card text-white">Consolidado Geral</option>
+                                <option value="0" class="bg-dark-card text-white">Janeiro</option><option value="1" class="bg-dark-card text-white">Fevereiro</option>
+                                <option value="2" class="bg-dark-card text-white">Março</option><option value="3" class="bg-dark-card text-white">Abril</option>
+                                <option value="4" class="bg-dark-card text-white">Maio</option><option value="5" class="bg-dark-card text-white">Junho</option>
+                                <option value="6" class="bg-dark-card text-white">Julho</option><option value="7" class="bg-dark-card text-white">Agosto</option>
+                                <option value="8" class="bg-dark-card text-white">Setembro</option><option value="9" class="bg-dark-card text-white">Outubro</option>
+                                <option value="10" class="bg-dark-card text-white">Novembro</option><option value="11" class="bg-dark-card text-white">Dezembro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <div class="text-xs font-bold text-zinc-400 uppercase">Faturamento Mês</div>
+                        <div id="dir-kpi-entradas" class="text-2xl font-black text-emerald-400 mt-1">R$ 0,00</div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <div class="text-xs font-bold text-zinc-400 uppercase">Pro-Labore Pago</div>
+                        <div id="dir-kpi-prolabore" class="text-2xl font-black text-gold-400 mt-1">R$ 0,00</div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <div class="text-xs font-bold text-zinc-400 uppercase">Despesas Operacionais</div>
+                        <div id="dir-kpi-saidas" class="text-2xl font-black text-rose-400 mt-1">R$ 0,00</div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <div class="text-xs font-bold text-zinc-400 uppercase">Resultado Líquido Final</div>
+                        <div id="dir-kpi-resultado" class="text-2xl font-black text-white mt-1">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Pro-Labore por Diretora</h3>
+                        <div class="h-72 flex items-center justify-center"><canvas id="dir-chart-prolabore"></canvas></div>
+                    </div>
+                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Composição de Saídas & Pro-Labore</h3>
+                        <div class="h-72 flex items-center justify-center"><canvas id="dir-chart-composicao"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="bg-dark-card border-t border-dark-border py-4 text-center text-xs text-zinc-500">
+            Rosemary Gestão Financeira • Elegância e Controle em Pro-Labore
+        </footer>
+    </div>
+
+    <!-- MODAL EDITAR DESPESA -->
+    <div id="modal-edit-despesa" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 px-4">
+        <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-2xl w-full max-w-lg space-y-4">
+            <div class="flex items-center justify-between border-b border-dark-border pb-3">
+                <h3 class="text-sm font-bold text-white">Editar Despesa</h3>
+                <button onclick="closeEditDespesaModal()" class="text-zinc-400 hover:text-white">✕</button>
+            </div>
+            <form id="form-edit-despesa" class="space-y-3">
+                <input type="hidden" id="edit-despesa-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Vencimento</label>
+                        <input type="date" id="edit-despesa-venc" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Pagamento</label>
+                        <input type="date" id="edit-despesa-pag" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Tipo de Despesa</label>
+                    <input type="text" id="edit-despesa-tipo" required class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Descrição</label>
+                    <input type="text" id="edit-despesa-desc" required class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Valor (R$)</label>
+                        <input type="number" step="0.01" id="edit-despesa-valor" required class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Status</label>
+                        <select id="edit-despesa-status" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white">
+                            <option value="Pago">Pago</option><option value="Pendente">Pendente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeEditDespesaModal()" class="px-4 py-2 rounded-xl bg-zinc-800 text-xs text-zinc-300">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-gold-500 text-xs text-dark-bg font-bold">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        const MASTER_EMAIL = "admin@rosemary.com.br";
+        const MASTER_PASS = "Lacan1404@";
+
+        let users = JSON.parse(localStorage.getItem('rosemary_users')) || [{ email: MASTER_EMAIL, pass: MASTER_PASS, role: 'MASTER' }];
+        let currentUser = null;
+        let despesas = JSON.parse(localStorage.getItem('rosemary_despesas')) || [];
+        let entradas = JSON.parse(localStorage.getItem('rosemary_entradas')) || [];
+        let prolabores = JSON.parse(localStorage.getItem('rosemary_prolabores')) || [];
+        let charts = {};
+
+        const monthMap = {
+            'janeiro': 0, 'fevereiro': 1, 'março': 2, 'marco': 2, 'abril': 3, 'maio': 4, 'junho': 5,
+            'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value.trim();
+                const pass = document.getElementById('login-password').value.trim();
+                const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
+                if (found) {
+                    currentUser = found;
+                    initApp();
+                } else {
+                    const err = document.getElementById('login-error');
+                    err.textContent = "E-mail ou senha incorretos!";
+                    err.classList.remove('hidden');
+                }
+            });
+
+            document.getElementById('form-prolabore').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const editId = document.getElementById('prolabore-edit-id').value;
+                const diretora = document.getElementById('prolabore-diretora').value.trim();
+                const valor = parseFloat(document.getElementById('prolabore-valor').value);
+                const mes = document.getElementById('prolabore-mes').value;
+                const data = document.getElementById('prolabore-data').value;
+
+                if (editId) {
+                    const idx = prolabores.findIndex(p => p.id == editId);
+                    if (idx !== -1) prolabores[idx] = { id: Number(editId), diretora, valor, mes, data };
+                } else {
+                    prolabores.push({ id: Date.now(), diretora, valor, mes, data });
+                }
+
+                localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
+                cancelEditProlabore();
+                updateAll();
+            });
+
+            document.getElementById('form-entrada').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const valor = parseFloat(document.getElementById('entrada-valor').value);
+                const descricao = document.getElementById('entrada-descricao').value.trim();
+                const data = document.getElementById('entrada-data').value;
+                entradas.push({ id: Date.now(), valor, descricao, data });
+                localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
+                document.getElementById('form-entrada').reset();
+                updateAll();
+            });
+
+            document.getElementById('form-edit-despesa').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('edit-despesa-id').value;
+                const idx = despesas.findIndex(d => d.id == id);
+                if (idx !== -1) {
+                    despesas[idx].dataVencimento = document.getElementById('edit-despesa-venc').value;
+                    despesas[idx].dataPagamento = document.getElementById('edit-despesa-pag').value;
+                    despesas[idx].tipoDespesa = document.getElementById('edit-despesa-tipo').value.trim();
+                    despesas[idx].descricao = document.getElementById('edit-despesa-desc').value.trim();
+                    despesas[idx].valor = parseFloat(document.getElementById('edit-despesa-valor').value) || 0;
+                    despesas[idx].status = document.getElementById('edit-despesa-status').value;
+                    localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                    closeEditDespesaModal();
+                    updateAll();
+                }
+            });
+
+            document.getElementById('excel-file-input').addEventListener('change', handleFileUpload);
+        });
+
+        function initApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('user-display-email').textContent = currentUser.email;
+            updateAll();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-dark-card', 'text-white', 'shadow', 'border', 'border-gold-500/20');
+                btn.classList.add('text-zinc-400');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-dark-card', 'text-white', 'shadow', 'border', 'border-gold-500/20');
+                activeBtn.classList.remove('text-zinc-400');
+            }
+            if (tabId === 'diretoria') updateDiretoria();
+        }
+
+        function getFilteredData() {
+            const start = document.getElementById('filter-start-date').value;
+            const end = document.getElementById('filter-end-date').value;
+
+            let fDespesas = [...despesas];
+            let fEntradas = [...entradas];
+            let fProlabores = [...prolabores];
+
+            if (start) {
+                fDespesas = fDespesas.filter(d => (d.dataPagamento || d.dataVencimento) >= start);
+                fEntradas = fEntradas.filter(e => e.data >= start);
+                fProlabores = fProlabores.filter(p => p.data >= start);
+            }
+            if (end) {
+                fDespesas = fDespesas.filter(d => (d.dataPagamento || d.dataVencimento) <= end);
+                fEntradas = fEntradas.filter(e => e.data <= end);
+                fProlabores = fProlabores.filter(p => p.data <= end);
+            }
+            return { fDespesas, fEntradas, fProlabores };
+        }
+
+        function updateAll() {
+            const { fDespesas, fEntradas, fProlabores } = getFilteredData();
+            const totalEntradas = fEntradas.reduce((acc, e) => acc + (parseFloat(e.valor) || 0), 0);
+            const totalSaidas = fDespesas.reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0);
+            const totalProlabore = fProlabores.reduce((acc, p) => acc + (parseFloat(p.valor) || 0), 0);
+            const saldo = totalEntradas - (totalSaidas + totalProlabore);
+
+            document.getElementById('kpi-entradas').textContent = formatCurrency(totalEntradas);
+            document.getElementById('kpi-saidas').textContent = formatCurrency(totalSaidas);
+            document.getElementById('kpi-prolabore').textContent = formatCurrency(totalProlabore);
+            document.getElementById('kpi-saldo').textContent = formatCurrency(saldo);
+            document.getElementById('prolabore-total-badge').textContent = formatCurrency(totalProlabore);
+
+            renderTables();
+            renderCharts(fEntradas, fDespesas, fProlabores);
+            updateDiretoria();
+        }
+
+        function clearDateFilter() {
+            document.getElementById('filter-start-date').value = '';
+            document.getElementById('filter-end-date').value = '';
+            updateAll();
+        }
+
+        function formatCurrency(val) {
+            return (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function renderTables() {
+            const { fDespesas, fEntradas, fProlabores } = getFilteredData();
+            const search = document.getElementById('search-despesas')?.value.toLowerCase() || '';
+
+            // Tabela Despesas
+            const tbodyDesp = document.getElementById('table-despesas-body');
+            tbodyDesp.innerHTML = '';
+            const filteredDesp = fDespesas.filter(d => (d.descricao || '').toLowerCase().includes(search) || (d.tipoDespesa || '').toLowerCase().includes(search));
+            filteredDesp.forEach(d => {
+                tbodyDesp.innerHTML += `
+                    <tr class="hover:bg-dark-hover/50 transition">
+                        <td class="p-3">${d.dataVencimento || '-'}</td>
+                        <td class="p-3">${d.dataPagamento || '-'}</td>
+                        <td class="p-3 font-semibold text-white">${d.tipoDespesa || 'Geral'}</td>
+                        <td class="p-3 text-zinc-300">${d.descricao || ''}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">${d.status || 'Pago'}</span></td>
+                        <td class="p-3 text-right font-bold text-rose-400">${formatCurrency(d.valor)}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="openEditDespesaModal(${d.id})" class="text-zinc-400 hover:text-gold-400 mr-2"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button onclick="deleteDespesa(${d.id})" class="text-zinc-500 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Tabela Pro-Labore
+            const tbodyProl = document.getElementById('table-prolabore-body');
+            tbodyProl.innerHTML = '';
+            fProlabores.forEach(p => {
+                tbodyProl.innerHTML += `
+                    <tr class="hover:bg-dark-hover/50 transition">
+                        <td class="p-3">${p.data}</td>
+                        <td class="p-3 font-bold text-gold-400">${p.mes}</td>
+                        <td class="p-3 font-medium text-white">${p.diretora}</td>
+                        <td class="p-3 text-right font-bold text-gold-400">${formatCurrency(p.valor)}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="startEditProlabore(${p.id})" class="text-zinc-400 hover:text-gold-400 mr-2"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button onclick="deleteProlabore(${p.id})" class="text-zinc-500 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Tabela Entradas
+            const tbodyEnt = document.getElementById('table-entradas-body');
+            tbodyEnt.innerHTML = '';
+            fEntradas.forEach(e => {
+                tbodyEnt.innerHTML += `
+                    <tr class="hover:bg-dark-hover/50 transition">
+                        <td class="p-3">${e.data}</td>
+                        <td class="p-3 font-medium text-white">${e.descricao}</td>
+                        <td class="p-3 text-right font-bold text-emerald-400">${formatCurrency(e.valor)}</td>
+                        <td class="p-3 text-center"><button onclick="deleteEntrada(${e.id})" class="text-zinc-500 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                    </tr>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function startEditProlabore(id) {
+            const p = prolabores.find(item => item.id == id);
+            if (!p) return;
+            document.getElementById('prolabore-edit-id').value = p.id;
+            document.getElementById('prolabore-diretora').value = p.diretora;
+            document.getElementById('prolabore-valor').value = p.valor;
+            document.getElementById('prolabore-mes').value = p.mes;
+            document.getElementById('prolabore-data').value = p.data;
+            document.getElementById('form-prolabore-title').innerHTML = '<i data-lucide="edit-3" class="w-4 h-4 text-gold-400"></i> Editar Pro-Labore';
+            document.getElementById('btn-cancelar-prolabore').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function cancelEditProlabore() {
+            document.getElementById('form-prolabore').reset();
+            document.getElementById('prolabore-edit-id').value = '';
+            document.getElementById('form-prolabore-title').innerHTML = '<i data-lucide="award" class="w-4 h-4 text-gold-400"></i> Registrar Pro-Labore';
+            document.getElementById('btn-cancelar-prolabore').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        function deleteProlabore(id) {
+            if (confirm('Deseja excluir este registro de pro-labore?')) {
+                prolabores = prolabores.filter(p => p.id !== id);
+                localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
+                updateAll();
+            }
+        }
+
+        function deleteDespesa(id) {
+            if (confirm('Deseja excluir esta despesa?')) {
+                despesas = despesas.filter(d => d.id !== id);
+                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                updateAll();
+            }
+        }
+
+        function deleteEntrada(id) {
+            if (confirm('Deseja excluir esta entrada?')) {
+                entradas = entradas.filter(e => e.id !== id);
+                localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
+                updateAll();
+            }
+        }
+
+        function openEditDespesaModal(id) {
+            const d = despesas.find(item => item.id == id);
+            if (!d) return;
+            document.getElementById('edit-despesa-id').value = d.id;
+            document.getElementById('edit-despesa-venc').value = d.dataVencimento || '';
+            document.getElementById('edit-despesa-pag').value = d.dataPagamento || '';
+            document.getElementById('edit-despesa-tipo').value = d.tipoDespesa || '';
+            document.getElementById('edit-despesa-desc').value = d.descricao || '';
+            document.getElementById('edit-despesa-valor').value = d.valor || 0;
+            document.getElementById('edit-despesa-status').value = d.status || 'Pago';
+            document.getElementById('modal-edit-despesa').classList.remove('hidden');
+        }
+
+        function closeEditDespesaModal() {
+            document.getElementById('modal-edit-despesa').classList.add('hidden');
+        }
+
+        function renderCharts(fEntradas, fDespesas, fProlabores) {
+            if (charts.tipo) charts.tipo.destroy();
+            if (charts.fluxo) charts.fluxo.destroy();
+
+            const tipoMap = {};
+            fDespesas.forEach(d => {
+                const t = d.tipoDespesa || 'Outros';
+                tipoMap[t] = (tipoMap[t] || 0) + (parseFloat(d.valor) || 0);
+            });
+            charts.tipo = new Chart(document.getElementById('chart-tipo-despesa').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(tipoMap).length ? Object.keys(tipoMap) : ['Sem dados'],
+                    datasets: [{ data: Object.values(tipoMap).length ? Object.values(tipoMap) : [1], backgroundColor: ['#7c3aed', '#eab308', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#a1a1aa' } } } }
+            });
+
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const entMensal = new Array(12).fill(0);
+            const saiMensal = new Array(12).fill(0);
+            fEntradas.forEach(e => { if (e.data) { const m = new Date(e.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) entMensal[m] += e.valor; } });
+            fDespesas.forEach(d => { const dt = d.dataPagamento || d.dataVencimento; if (dt) { const m = new Date(dt + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiMensal[m] += d.valor; } });
+            fProlabores.forEach(p => { if (p.data) { const m = new Date(p.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiMensal[m] += p.valor; } });
+
+            charts.fluxo = new Chart(document.getElementById('chart-fluxo-mensal').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: 'Entradas', data: entMensal, backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Saídas + Pro-Labore', data: saiMensal, backgroundColor: '#eab308', borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#a1a1aa' } }, y: { ticks: { color: '#a1a1aa' } } } }
+            });
+        }
+
+        function updateDiretoria() {
+            const selectedMonth = document.getElementById('dir-month-select').value;
+            let dDespesas = [...despesas];
+            let dEntradas = [...entradas];
+            let dProlabores = [...prolabores];
+
+            if (selectedMonth !== 'all') {
+                const m = parseInt(selectedMonth);
+                dDespesas = dDespesas.filter(d => {
+                    const dt = d.dataPagamento || d.dataVencimento;
+                    return dt && new Date(dt + 'T00:00:00').getMonth() === m;
+                });
+                dEntradas = dEntradas.filter(e => e.data && new Date(e.data + 'T00:00:00').getMonth() === m);
+                dProlabores = dProlabores.filter(p => p.data && new Date(p.data + 'T00:00:00').getMonth() === m);
+            }
+
+            const totalEntradas = dEntradas.reduce((acc, e) => acc + (parseFloat(e.valor) || 0), 0);
+            const totalSaidas = dDespesas.reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0);
+            const totalProlabore = dProlabores.reduce((acc, p) => acc + (parseFloat(p.valor) || 0), 0);
+            const resultado = totalEntradas - (totalSaidas + totalProlabore);
+
+            document.getElementById('dir-kpi-entradas').textContent = formatCurrency(totalEntradas);
+            document.getElementById('dir-kpi-prolabore').textContent = formatCurrency(totalProlabore);
+            document.getElementById('dir-kpi-saidas').textContent = formatCurrency(totalSaidas);
+            document.getElementById('dir-kpi-resultado').textContent = formatCurrency(resultado);
+            document.getElementById('dir-kpi-resultado').className = `text-2xl font-black mt-1 ${resultado >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            // Gráfico Pro-Labore por Diretora
+            const diretoraMap = {};
+            dProlabores.forEach(p => { diretoraMap[p.diretora] = (diretoraMap[p.diretora] || 0) + p.valor; });
+            if (charts.dirProl) charts.dirProl.destroy();
+            charts.dirProl = new Chart(document.getElementById('dir-chart-prolabore').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(diretoraMap).length ? Object.keys(diretoraMap) : ['Sem pro-labore'],
+                    datasets: [{ data: Object.values(diretoraMap).length ? Object.values(diretoraMap) : [1], backgroundColor: ['#eab308', '#7c3aed', '#3b82f6', '#10b981'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#a1a1aa' } } } }
+            });
+
+            // Gráfico Composição
+            if (charts.dirComp) charts.dirComp.destroy();
+            charts.dirComp = new Chart(document.getElementById('dir-chart-composicao').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Despesas Operacionais', 'Pro-Labore Diretoria'],
+                    datasets: [{ data: [totalSaidas, totalProlabore], backgroundColor: ['#7c3aed', '#eab308'], borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a1a1aa' } }, y: { ticks: { color: '#a1a1aa' } } } }
+            });
+        }
+
+        function formatDateVal(val) {
+            if (!val) return '';
+            if (val instanceof Date) {
+                const y = val.getFullYear();
+                const m = String(val.getMonth() + 1).padStart(2, '0');
+                const d = String(val.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            const s = String(val).trim();
+            if (s.includes('/')) {
+                const parts = s.split('/');
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) return `${parts[0]}-${parts[1]}-${parts[2]}`;
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+            return s.substring(0, 10);
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                if (json.length < 2) return;
+
+                const headers = json[0].map(h => String(h).toLowerCase().trim());
+                const parsedDespesas = [];
+                for (let i = 1; i < json.length; i++) {
+                    const row = json[i];
+                    if (!row || row.length === 0) continue;
+                    const val = parseFloat(row[5]) || parseFloat(row[4]) || 0;
+                    if (val === 0) continue;
+                    parsedDespesas.push({
+                        id: Date.now() + i,
+                        dataVencimento: formatDateVal(row[1]),
+                        dataPagamento: formatDateVal(row[10]),
+                        tipoDespesa: row[2] || 'Geral',
+                        descricao: row[3] || '',
+                        status: row[8] || 'Pago',
+                        valor: val
+                    });
+                }
+                despesas = parsedDespesas;
+                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                alert(`${despesas.length} despesas importadas com sucesso!`);
+                updateAll();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportData() {
+            const dataToExport = despesas.map(d => ({
+                'Data Vencimento': d.dataVencimento,
+                'Data Pagamento': d.dataPagamento,
+                'Tipo de Despesa': d.tipoDespesa,
+                'Descrição': d.descricao,
+                'Status': d.status,
+                'Valor (R$)': d.valor
+            }));
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Despesas");
+            XLSX.writeFile(wb, "Modelo_Rosemary.xlsx");
+        }
+    </script>
+</body>
+</html>
