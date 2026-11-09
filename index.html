@@ -137,7 +137,7 @@
             <div class="bg-dark-card border border-gold-500/20 rounded-3xl p-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
                 <div class="w-full md:w-auto flex items-center gap-3 flex-wrap">
                     <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 border border-gold-500/30">
-                        <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Planilha (XLSX)
+                        <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Planilha (Atualização Automática)
                         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden">
                     </label>
                     <button onclick="exportData()" class="bg-dark-bg hover:bg-dark-hover border border-dark-border text-zinc-300 hover:text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2">
@@ -162,22 +162,18 @@
             <section id="tab-dashboard" class="tab-content space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Entradas</div>
                         <div id="kpi-entradas" class="text-2xl font-black text-emerald-400">R$ 0,00</div>
                     </div>
                     <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl"></div>
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Saídas & Custos</div>
                         <div id="kpi-saidas" class="text-2xl font-black text-rose-400">R$ 0,00</div>
                     </div>
                     <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-gold-500/5 rounded-full blur-2xl"></div>
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Pro-Labore Pago</div>
                         <div id="kpi-prolabore" class="text-2xl font-black text-gold-400">R$ 0,00</div>
                     </div>
                     <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full blur-2xl"></div>
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Saldo Líquido Real</div>
                         <div id="kpi-saldo" class="text-2xl font-black text-white">R$ 0,00</div>
                     </div>
@@ -186,7 +182,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <i data-lucide="bar-chart-3" class="w-4 h-4 text-gold-400"></i> Fluxo Mensal (Entradas vs Saídas & Pro-Labore)
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 text-gold-400"></i> Fluxo Mensal
                         </h3>
                         <div class="h-80"><canvas id="chart-fluxo-mensal"></canvas></div>
                     </div>
@@ -217,7 +213,7 @@
                                 <input type="number" step="0.01" id="prolabore-valor" required placeholder="0.00" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Mês de Referência (Competência)</label>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Mês de Referência</label>
                                 <select id="prolabore-mes" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-gold-500">
                                     <option value="Janeiro">Janeiro</option><option value="Fevereiro">Fevereiro</option><option value="Março">Março</option>
                                     <option value="Abril">Abril</option><option value="Maio">Maio</option><option value="Junho">Junho</option>
@@ -242,7 +238,7 @@
 
                     <div class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Histórico de Pro-Labore Pagos à Diretoria</h3>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Histórico de Pro-Labore</h3>
                             <div class="text-xs font-bold text-gold-400 bg-gold-500/10 px-3 py-1.5 rounded-xl border border-gold-500/20">
                                 Total: <span id="prolabore-total-badge">R$ 0,00</span>
                             </div>
@@ -271,7 +267,7 @@
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
                             <h2 class="text-lg font-black text-white">Detalhamento de Saídas & Custos</h2>
-                            <p class="text-xs text-zinc-400">Gerencie despesas operacionais da empresa</p>
+                            <p class="text-xs text-zinc-400">Atualização inteligente por código/descrição</p>
                         </div>
                         <div class="relative w-full sm:w-64">
                             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-zinc-500"></i>
@@ -282,6 +278,7 @@
                         <table class="w-full text-left text-xs text-zinc-300">
                             <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
                                 <tr>
+                                    <th class="p-3">Código</th>
                                     <th class="p-3">Vencimento</th>
                                     <th class="p-3">Pagamento</th>
                                     <th class="p-3">Tipo Despesa</th>
@@ -457,11 +454,6 @@
         let prolabores = JSON.parse(localStorage.getItem('rosemary_prolabores')) || [];
         let charts = {};
 
-        const monthMap = {
-            'janeiro': 0, 'fevereiro': 1, 'março': 2, 'marco': 2, 'abril': 3, 'maio': 4, 'junho': 5,
-            'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11
-        };
-
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
@@ -617,10 +609,11 @@
             // Tabela Despesas
             const tbodyDesp = document.getElementById('table-despesas-body');
             tbodyDesp.innerHTML = '';
-            const filteredDesp = fDespesas.filter(d => (d.descricao || '').toLowerCase().includes(search) || (d.tipoDespesa || '').toLowerCase().includes(search));
+            const filteredDesp = fDespesas.filter(d => (d.descricao || '').toLowerCase().includes(search) || (d.tipoDespesa || '').toLowerCase().includes(search) || String(d.codigo || '').toLowerCase().includes(search));
             filteredDesp.forEach(d => {
                 tbodyDesp.innerHTML += `
                     <tr class="hover:bg-dark-hover/50 transition">
+                        <td class="p-3 font-mono text-gold-400">${d.codigo || '-'}</td>
                         <td class="p-3">${d.dataVencimento || '-'}</td>
                         <td class="p-3">${d.dataPagamento || '-'}</td>
                         <td class="p-3 font-semibold text-white">${d.tipoDespesa || 'Geral'}</td>
@@ -796,7 +789,6 @@
             document.getElementById('dir-kpi-resultado').textContent = formatCurrency(resultado);
             document.getElementById('dir-kpi-resultado').className = `text-2xl font-black mt-1 ${resultado >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-            // Gráfico Pro-Labore por Diretora
             const diretoraMap = {};
             dProlabores.forEach(p => { diretoraMap[p.diretora] = (diretoraMap[p.diretora] || 0) + p.valor; });
             if (charts.dirProl) charts.dirProl.destroy();
@@ -809,7 +801,6 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#a1a1aa' } } } }
             });
 
-            // Gráfico Composição
             if (charts.dirComp) charts.dirComp.destroy();
             charts.dirComp = new Chart(document.getElementById('dir-chart-composicao').getContext('2d'), {
                 type: 'bar',
@@ -840,6 +831,7 @@
             return s.substring(0, 10);
         }
 
+        // FUNÇÃO DE IMPORTAÇÃO COM ATUALIZAÇÃO AUTOMÁTICA (EVITA DUPLICIDADE)
         function handleFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -852,25 +844,51 @@
                 if (json.length < 2) return;
 
                 const headers = json[0].map(h => String(h).toLowerCase().trim());
-                const parsedDespesas = [];
+                let atualizados = 0;
+                let novos = 0;
+
                 for (let i = 1; i < json.length; i++) {
                     const row = json[i];
                     if (!row || row.length === 0) continue;
+
+                    const codigo = String(row[0] || '').trim();
                     const val = parseFloat(row[5]) || parseFloat(row[4]) || 0;
-                    if (val === 0) continue;
-                    parsedDespesas.push({
-                        id: Date.now() + i,
+                    if (val === 0 && !codigo) continue;
+
+                    const itemImportado = {
+                        codigo: codigo || `ITEM-${i}`,
                         dataVencimento: formatDateVal(row[1]),
                         dataPagamento: formatDateVal(row[10]),
                         tipoDespesa: row[2] || 'Geral',
                         descricao: row[3] || '',
                         status: row[8] || 'Pago',
                         valor: val
-                    });
+                    };
+
+                    // Verifica se já existe uma despesa com o mesmo código no sistema
+                    const indexExistente = despesas.findIndex(d => String(d.codigo).trim() === String(itemImportado.codigo).trim());
+
+                    if (indexExistente !== -1) {
+                        // ATUALIZA apenas o valor, status e dados essenciais mantendo o ID
+                        despesas[indexExistente].valor = itemImportado.valor;
+                        despesas[indexExistente].status = itemImportado.status;
+                        despesas[indexExistente].dataVencimento = itemImportado.dataVencimento || despesas[indexExistente].dataVencimento;
+                        despesas[indexExistente].dataPagamento = itemImportado.dataPagamento || despesas[indexExistente].dataPagamento;
+                        despesas[indexExistente].tipoDespesa = itemImportado.tipoDespesa || despesas[indexExistente].tipoDespesa;
+                        despesas[indexExistente].descricao = itemImportado.descricao || despesas[indexExistente].descricao;
+                        atualizados++;
+                    } else {
+                        // ADICIONA como novo item
+                        despesas.push({
+                            id: Date.now() + i,
+                            ...itemImportado
+                        });
+                        novos++;
+                    }
                 }
-                despesas = parsedDespesas;
+
                 localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
-                alert(`${despesas.length} despesas importadas com sucesso!`);
+                alert(`Importação concluída!\n• ${novos} novos itens adicionados.\n• ${atualizados} itens existentes atualizados com sucesso.`);
                 updateAll();
             };
             reader.readAsArrayBuffer(file);
@@ -878,6 +896,7 @@
 
         function exportData() {
             const dataToExport = despesas.map(d => ({
+                'Código': d.codigo,
                 'Data Vencimento': d.dataVencimento,
                 'Data Pagamento': d.dataPagamento,
                 'Tipo de Despesa': d.tipoDespesa,
