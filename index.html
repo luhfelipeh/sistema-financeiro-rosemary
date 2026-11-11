@@ -228,12 +228,12 @@
                     <form id="form-nova-despesa" class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Código (Opcional)</label>
-                                <input type="text" id="novo-despesa-codigo" placeholder="Ex: DESP-001..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Código (Número) *</label>
+                                <input type="number" id="novo-despesa-codigo" required placeholder="Ex: 1, 2, 3..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-zinc-300 mb-1">Tipo de Despesa / Categoria *</label>
-                                <input type="text" id="novo-despesa-tipo" required placeholder="Ex: Operacional, Aluguel, Fornecedor..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
+                                <input type="text" id="novo-despesa-tipo" required placeholder="Ex: Operacional, Aluguel..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                         </div>
 
@@ -244,7 +244,7 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor Lançado (R$) *</label>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor Total (R$) *</label>
                                 <input type="number" step="0.01" id="novo-despesa-valor" required placeholder="0.00" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                             <div>
@@ -252,13 +252,13 @@
                                 <input type="date" id="novo-despesa-venc" required class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Data Pagamento (Opcional)</label>
-                                <input type="date" id="novo-despesa-pag" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Data Lançamento *</label>
+                                <input type="date" id="novo-despesa-lanc" required class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor Já Pago (R$) <span class="text-zinc-500 font-normal">(Se igual ao valor lançado, marcará PAGO automaticamente)</span></label>
+                            <label class="block text-xs font-semibold text-zinc-300 mb-1">Valor Pago (R$) <span class="text-zinc-500 font-normal">(Deixe zerado ou vazio se for conta a pagar)</span></label>
                             <input type="number" step="0.01" id="novo-despesa-valorpago" placeholder="0.00" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
                         </div>
 
@@ -350,7 +350,7 @@
                 </div>
             </section>
 
-            <!-- TAB 3: CONTAS A PAGAR & DESPESAS (COM SELETOR RÁPIDO E RECONHECIMENTO AUTOMÁTICO) -->
+            <!-- TAB 3: CONTAS A PAGAR & DESPESAS -->
             <section id="tab-despesas" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
@@ -366,11 +366,11 @@
                 <div class="bg-dark-card border border-dark-border rounded-3xl p-6 shadow-xl space-y-4">
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div>
-                            <h2 class="text-lg font-black text-white">Detalhamento e Gestão de Contas a Pagar</h2>
-                            <p class="text-xs text-zinc-400">Ao preencher a coluna "Valor Pago" igual ao "Valor Lançado", a conta é baixada automaticamente.</p>
+                            <h2 class="text-lg font-black text-white">Contas a Pagar (Ordenado por Vencimento)</h2>
+                            <p class="text-xs text-zinc-400">Exibe apenas despesas com Valor Pago zerado/vazio. Preencha o Valor Pago para dar baixa automática.</p>
                         </div>
 
-                        <!-- SELETOR RÁPIDO DE PERÍODO (TODAS, HOJE, SEMANA, MÊS, ANO) -->
+                        <!-- SELETOR RÁPIDO DE PERÍODO -->
                         <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                             <div class="flex items-center gap-1 bg-dark-bg border border-dark-border p-1 rounded-2xl">
                                 <button onclick="setQuickPeriodFilter('all')" id="btn-period-all" class="btn-period px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-dark-card border border-gold-500/20">Todas</button>
@@ -410,12 +410,13 @@
                                         <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)" class="cursor-pointer accent-gold-500 rounded">
                                     </th>
                                     <th class="p-3">Código</th>
-                                    <th class="p-3">Vencimento</th>
-                                    <th class="p-3">Pagamento</th>
+                                    <th class="p-3">Lançamento</th>
                                     <th class="p-3">Tipo Despesa</th>
                                     <th class="p-3">Descrição</th>
-                                    <th class="p-3 text-right">Valor Lançado</th>
+                                    <th class="p-3">Mês</th>
+                                    <th class="p-3 text-right">Valor Total</th>
                                     <th class="p-3 text-right">Valor Pago (R$)</th>
+                                    <th class="p-3">Vencimento</th>
                                     <th class="p-3 text-center">Status</th>
                                     <th class="p-3 text-center">Ações</th>
                                 </tr>
@@ -566,8 +567,8 @@
                 <input type="hidden" id="modal-edit-id">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-zinc-400 mb-1">Código</label>
-                        <input type="text" id="modal-edit-codigo" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
+                        <label class="block text-xs text-zinc-400 mb-1">Código (Número)</label>
+                        <input type="number" id="modal-edit-codigo" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
                     </div>
                     <div>
                         <label class="block text-xs text-zinc-400 mb-1">Tipo de Despesa</label>
@@ -580,17 +581,17 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-zinc-400 mb-1">Vencimento</label>
-                        <input type="date" id="modal-edit-venc" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
+                        <label class="block text-xs text-zinc-400 mb-1">Lançamento</label>
+                        <input type="date" id="modal-edit-lanc" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
                     </div>
                     <div>
-                        <label class="block text-xs text-zinc-400 mb-1">Pagamento</label>
-                        <input type="date" id="modal-edit-pag" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
+                        <label class="block text-xs text-zinc-400 mb-1">Vencimento</label>
+                        <input type="date" id="modal-edit-venc" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-zinc-400 mb-1">Valor Lançado (R$)</label>
+                        <label class="block text-xs text-zinc-400 mb-1">Valor Total (R$)</label>
                         <input type="number" step="0.01" id="modal-edit-valor" required class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500">
                     </div>
                     <div>
@@ -623,7 +624,6 @@
         let quickPeriodFilter = 'all';
         let charts = {};
 
-        // CORES ÚNICAS E EXCLUSIVAS PARA CATEGORIAS
         const COLOR_PALETTE = [
             '#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
             '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', 
@@ -653,11 +653,6 @@
             return categoriesArray.map(cat => getCategoryColor(cat));
         }
 
-        const monthMap = {
-            'janeiro': 0, 'fevereiro': 1, 'março': 2, 'marco': 2, 'abril': 3, 'maio': 4, 'junho': 5,
-            'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11
-        };
-
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
@@ -676,19 +671,17 @@
                 }
             });
 
-            // NOVO FORMULÁRIO DE LANÇAMENTO DE DESPESA
             document.getElementById('form-nova-despesa').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const codigo = document.getElementById('novo-despesa-codigo').value.trim();
+                const codigo = parseInt(document.getElementById('novo-despesa-codigo').value) || 1;
                 const tipo = document.getElementById('novo-despesa-tipo').value.trim();
                 const desc = document.getElementById('novo-despesa-desc').value.trim();
-                const valorLancado = parseFloat(document.getElementById('novo-despesa-valor').value) || 0;
+                const valorTotal = parseFloat(document.getElementById('novo-despesa-valor').value) || 0;
                 const venc = document.getElementById('novo-despesa-venc').value;
-                const pag = document.getElementById('novo-despesa-pag').value;
+                const lanc = document.getElementById('novo-despesa-lanc').value;
                 const valorPagoInput = parseFloat(document.getElementById('novo-despesa-valorpago').value) || 0;
 
-                // REGRA DE RECONHECIMENTO AUTOMÁTICO: Se valor pago >= valor lançado -> PAGO
-                const isPago = valorPagoInput > 0 && valorPagoInput >= valorLancado;
+                const isPago = valorPagoInput > 0;
                 const statusCalculado = isPago ? 'Pago' : 'Pendente';
 
                 let monthName = '';
@@ -700,14 +693,14 @@
 
                 const novaDespesa = {
                     id: Date.now(),
-                    codigo: codigo || `DESP-${Date.now().toString().slice(-4)}`,
-                    dataVencimento: venc,
-                    dataPagamento: pag || (isPago ? venc : ''),
-                    mes: monthName,
+                    codigo: codigo,
+                    dataLancamento: lanc || new Date().toISOString().split('T')[0],
                     tipoDespesa: tipo,
                     descricao: desc,
-                    valor: valorLancado,
+                    mes: monthName,
+                    valor: valorTotal,
                     valorPago: valorPagoInput,
+                    dataVencimento: venc,
                     status: statusCalculado
                 };
 
@@ -725,16 +718,16 @@
                 const id = document.getElementById('modal-edit-id').value;
                 const idx = despesas.findIndex(d => d.id == id);
                 if (idx !== -1) {
-                    const valLancado = parseFloat(document.getElementById('modal-edit-valor').value) || 0;
+                    const valTotal = parseFloat(document.getElementById('modal-edit-valor').value) || 0;
                     const valPago = parseFloat(document.getElementById('modal-edit-valorpago').value) || 0;
-                    const isPago = valPago > 0 && valPago >= valLancado;
+                    const isPago = valPago > 0;
 
-                    despesas[idx].codigo = document.getElementById('modal-edit-codigo').value.trim();
-                    despesas[idx].dataVencimento = document.getElementById('modal-edit-venc').value;
-                    despesas[idx].dataPagamento = document.getElementById('modal-edit-pag').value;
+                    despesas[idx].codigo = parseInt(document.getElementById('modal-edit-codigo').value) || 1;
+                    despesas[idx].dataLancamento = document.getElementById('modal-edit-lanc').value;
                     despesas[idx].tipoDespesa = document.getElementById('modal-edit-tipo').value.trim();
                     despesas[idx].descricao = document.getElementById('modal-edit-desc').value.trim();
-                    despesas[idx].valor = valLancado;
+                    despesas[idx].dataVencimento = document.getElementById('modal-edit-venc').value;
+                    despesas[idx].valor = valTotal;
                     despesas[idx].valorPago = valPago;
                     despesas[idx].status = isPago ? 'Pago' : 'Pendente';
 
@@ -846,12 +839,12 @@
             let fProlabores = [...prolabores];
 
             if (start) {
-                fDespesas = fDespesas.filter(d => (d.dataPagamento || d.dataVencimento) >= start);
+                fDespesas = fDespesas.filter(d => (d.dataVencimento || d.dataLancamento) >= start);
                 fEntradas = fEntradas.filter(e => e.data >= start);
                 fProlabores = fProlabores.filter(p => p.data >= start);
             }
             if (end) {
-                fDespesas = fDespesas.filter(d => (d.dataPagamento || d.dataVencimento) <= end);
+                fDespesas = fDespesas.filter(d => (d.dataVencimento || d.dataLancamento) <= end);
                 fEntradas = fEntradas.filter(e => e.data <= end);
                 fProlabores = fProlabores.filter(p => p.data <= end);
             }
@@ -865,7 +858,7 @@
                 const todayStr = now.toISOString().split('T')[0];
 
                 if (quickPeriodFilter === 'day') {
-                    fDespesas = fDespesas.filter(d => (d.dataVencimento === todayStr || d.dataPagamento === todayStr));
+                    fDespesas = fDespesas.filter(d => (d.dataVencimento === todayStr || d.dataLancamento === todayStr));
                 } else if (quickPeriodFilter === 'week') {
                     const startOfWeek = new Date(now);
                     startOfWeek.setDate(now.getDate() - now.getDay());
@@ -875,14 +868,14 @@
                     const sStr = startOfWeek.toISOString().split('T')[0];
                     const eStr = endOfWeek.toISOString().split('T')[0];
                     fDespesas = fDespesas.filter(d => {
-                        const dt = d.dataVencimento || d.dataPagamento;
+                        const dt = d.dataVencimento || d.dataLancamento;
                         return dt >= sStr && dt <= eStr;
                     });
                 } else if (quickPeriodFilter === 'month') {
                     const currentMonth = now.getMonth();
                     const currentYear = now.getFullYear();
                     fDespesas = fDespesas.filter(d => {
-                        const dt = d.dataVencimento || d.dataPagamento;
+                        const dt = d.dataVencimento || d.dataLancamento;
                         if (!dt) return false;
                         const p = new Date(dt + 'T00:00:00');
                         return p.getMonth() === currentMonth && p.getFullYear() === currentYear;
@@ -890,7 +883,7 @@
                 } else if (quickPeriodFilter === 'year') {
                     const currentYear = now.getFullYear();
                     fDespesas = fDespesas.filter(d => {
-                        const dt = d.dataVencimento || d.dataPagamento;
+                        const dt = d.dataVencimento || d.dataLancamento;
                         if (!dt) return false;
                         return new Date(dt + 'T00:00:00').getFullYear() === currentYear;
                     });
@@ -944,8 +937,10 @@
 
         function toggleSelectAll(masterCheckbox) {
             const { fDespesas } = getFilteredData();
+            // Filtrar apenas contas a pagar (Valor Pago zerado/vazio) para a seleção em massa se desejado
+            const contasPagarOnly = fDespesas.filter(d => !d.valorPago || d.valorPago === 0);
             if (masterCheckbox.checked) {
-                fDespesas.forEach(d => selectedDespesasIds.add(d.id));
+                contasPagarOnly.forEach(d => selectedDespesasIds.add(d.id));
             } else {
                 selectedDespesasIds.clear();
             }
@@ -996,13 +991,8 @@
             const idx = despesas.findIndex(d => d.id == id);
             if (idx !== -1) {
                 despesas[idx].valorPago = valPago;
-                const valLancado = parseFloat(despesas[idx].valor) || 0;
-                
-                if (valPago > 0 && valPago >= valLancado) {
+                if (valPago > 0) {
                     despesas[idx].status = 'Pago';
-                    if (!despesas[idx].dataPagamento) {
-                        despesas[idx].dataPagamento = new Date().toISOString().split('T')[0];
-                    }
                 } else {
                     despesas[idx].status = 'Pendente';
                 }
@@ -1018,13 +1008,27 @@
 
             const tbodyDesp = document.getElementById('table-despesas-body');
             tbodyDesp.innerHTML = '';
-            const filteredDesp = fDespesas.filter(d => (d.descricao || '').toLowerCase().includes(search) || (d.tipoDespesa || '').toLowerCase().includes(search) || String(d.codigo || '').toLowerCase().includes(search));
+
+            // REGRA: Na aba contas a pagar, ficam APENAS as despesas que não têm valor lançado na coluna G (Valor Pago)
+            let contasPagar = fDespesas.filter(d => !d.valorPago || d.valorPago === 0);
+
+            // REGRA: Classificado por data de vencimento (crescente)
+            contasPagar.sort((a, b) => {
+                const dtA = a.dataVencimento || '9999-12-31';
+                const dtB = b.dataVencimento || '9999-12-31';
+                return dtA.localeCompare(dtB);
+            });
+
+            const filteredDesp = contasPagar.filter(d => 
+                (d.descricao || '').toLowerCase().includes(search) || 
+                (d.tipoDespesa || '').toLowerCase().includes(search) || 
+                String(d.codigo || '').toLowerCase().includes(search)
+            );
             
             if (filteredDesp.length === 0) {
-                tbodyDesp.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-zinc-500">Nenhuma despesa registrada.</td></tr>`;
+                tbodyDesp.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-zinc-500">Nenhuma conta a pagar pendente.</td></tr>`;
             } else {
                 filteredDesp.forEach(d => {
-                    const isPago = (d.status || '').toLowerCase().includes('pago');
                     const isChecked = selectedDespesasIds.has(d.id) ? 'checked' : '';
                     const catColor = getCategoryColor(d.tipoDespesa);
 
@@ -1034,23 +1038,24 @@
                                 <input type="checkbox" ${isChecked} onchange="toggleSelectDespesa(${d.id}, this)" class="cursor-pointer accent-gold-500 rounded">
                             </td>
                             <td class="p-3 font-mono text-gold-400 font-bold">${d.codigo || '-'}</td>
-                            <td class="p-3">${d.dataVencimento || '-'}</td>
-                            <td class="p-3">${d.dataPagamento || '-'}</td>
+                            <td class="p-3">${d.dataLancamento || '-'}</td>
                             <td class="p-3 font-semibold text-white flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${catColor}"></span>
                                 ${d.tipoDespesa || 'Geral'}
                             </td>
                             <td class="p-3 text-zinc-300">${d.descricao || ''}</td>
+                            <td class="p-3">${d.mes || '-'}</td>
                             <td class="p-3 text-right font-bold text-rose-400">${formatCurrency(parseFloat(d.valor) || 0)}</td>
                             <td class="p-3 text-right">
-                                <input type="number" step="0.01" value="${d.valorPago !== undefined ? d.valorPago : (isPago ? d.valor : '')}" 
+                                <input type="number" step="0.01" value="${d.valorPago || ''}" 
                                        onchange="updateValorPagoDirectly(${d.id}, this)" 
                                        placeholder="0.00" 
                                        class="w-24 text-right bg-dark-bg border border-dark-border rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-gold-500">
                             </td>
+                            <td class="p-3 font-semibold text-amber-300">${d.dataVencimento || '-'}</td>
                             <td class="p-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPago ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
-                                    ${d.status || 'Pendente'}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                    Pendente
                                 </span>
                             </td>
                             <td class="p-3 text-center">
@@ -1100,13 +1105,13 @@
             if (!d) return;
 
             document.getElementById('modal-edit-id').value = d.id;
-            document.getElementById('modal-edit-codigo').value = d.codigo || '';
-            document.getElementById('modal-edit-venc').value = d.dataVencimento || '';
-            document.getElementById('modal-edit-pag').value = d.dataPagamento || '';
+            document.getElementById('modal-edit-codigo').value = d.codigo || 1;
+            document.getElementById('modal-edit-lanc').value = d.dataLancamento || '';
             document.getElementById('modal-edit-tipo').value = d.tipoDespesa || '';
             document.getElementById('modal-edit-desc').value = d.descricao || '';
+            document.getElementById('modal-edit-venc').value = d.dataVencimento || '';
             document.getElementById('modal-edit-valor').value = d.valor || 0;
-            document.getElementById('modal-edit-valorpago').value = d.valorPago !== undefined ? d.valorPago : (d.status === 'Pago' ? d.valor : 0);
+            document.getElementById('modal-edit-valorpago').value = d.valorPago || 0;
 
             document.getElementById('modal-edit-despesa').classList.remove('hidden');
         }
@@ -1235,7 +1240,7 @@
             const entMensal = new Array(12).fill(0);
             const saiMensal = new Array(12).fill(0);
             fEntradas.forEach(e => { if (e.data) { const m = new Date(e.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) entMensal[m] += e.valor; } });
-            fDespesas.forEach(d => { const dt = d.dataPagamento || d.dataVencimento; if (dt) { const m = new Date(dt + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiMensal[m] += d.valor; } });
+            fDespesas.forEach(d => { const dt = d.dataVencimento || d.dataLancamento; if (dt) { const m = new Date(dt + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiMensal[m] += d.valor; } });
             fProlabores.forEach(p => { if (p.data) { const m = new Date(p.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiMensal[m] += p.valor; } });
 
             charts.fluxo = new Chart(document.getElementById('chart-fluxo-mensal').getContext('2d'), {
@@ -1262,7 +1267,7 @@
             let saiComp = new Array(12).fill(0);
 
             entradas.forEach(e => { if (e.data) { const m = new Date(e.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) entComp[m] += e.valor; } });
-            despesas.forEach(d => { const dt = d.dataPagamento || d.dataVencimento; if (dt) { const m = new Date(dt + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiComp[m] += d.valor; } });
+            despesas.forEach(d => { const dt = d.dataVencimento || d.dataLancamento; if (dt) { const m = new Date(dt + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiComp[m] += d.valor; } });
             prolabores.forEach(p => { if (p.data) { const m = new Date(p.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiComp[m] += p.valor; } });
 
             if (selectedMonth !== 'all') {
@@ -1272,7 +1277,7 @@
                 saiComp = [saiComp[m]];
 
                 dDespesas = dDespesas.filter(d => {
-                    const dt = d.dataPagamento || d.dataVencimento;
+                    const dt = d.dataVencimento || d.dataLancamento;
                     return dt && new Date(dt + 'T00:00:00').getMonth() === m;
                 });
                 dEntradas = dEntradas.filter(e => e.data && new Date(e.data + 'T00:00:00').getMonth() === m);
@@ -1373,27 +1378,40 @@
                     const row = json[i];
                     if (!row || row.length === 0) continue;
 
-                    const codigo = String(row[0] || '').trim();
-                    const val = parseFloat(row[6]) || parseFloat(row[5]) || parseFloat(row[4]) || 0;
-                    if (val === 0 && !codigo) continue;
+                    const codigo = parseInt(row[0]) || i;
+                    const valTotal = parseFloat(row[5]) || 0;
+                    const valPago = parseFloat(row[6]) || 0;
+                    if (valTotal === 0 && !row[3]) continue;
+
+                    let monthName = String(row[4] || '').trim();
+                    const venc = formatDateVal(row[7]);
+                    if (!monthName && venc) {
+                        const dt = new Date(venc + 'T00:00:00');
+                        const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                        monthName = months[dt.getMonth()];
+                    }
 
                     const itemImportado = {
-                        codigo: codigo || `ITEM-${i}`,
-                        dataVencimento: formatDateVal(row[1]),
-                        dataPagamento: formatDateVal(row[2]),
-                        tipoDespesa: row[3] || 'Geral',
-                        descricao: row[4] || '',
-                        status: row[5] || 'Pago',
-                        valor: val
+                        codigo: codigo,
+                        dataLancamento: formatDateVal(row[1]),
+                        tipoDespesa: row[2] || 'Geral',
+                        descricao: row[3] || '',
+                        mes: monthName,
+                        valor: valTotal,
+                        valorPago: valPago,
+                        dataVencimento: venc,
+                        status: valPago > 0 ? 'Pago' : 'Pendente'
                     };
 
-                    const indexExistente = despesas.findIndex(d => String(d.codigo).trim() === String(itemImportado.codigo).trim());
+                    // REGRA: Ao upar nova planilha, não lança nada com o mesmo código (Coluna A), apenas atualiza o valor pago (e status)
+                    const indexExistente = despesas.findIndex(d => Number(d.codigo) === Number(itemImportado.codigo));
 
                     if (indexExistente !== -1) {
-                        despesas[indexExistente].valor = itemImportado.valor;
-                        despesas[indexExistente].status = itemImportado.status;
+                        despesas[indexExistente].valorPago = itemImportado.valorPago;
+                        despesas[indexExistente].status = itemImportado.valorPago > 0 ? 'Pago' : 'Pendente';
+                        despesas[indexExistente].valor = itemImportado.valor || despesas[indexExistente].valor;
                         despesas[indexExistente].dataVencimento = itemImportado.dataVencimento || despesas[indexExistente].dataVencimento;
-                        despesas[indexExistente].dataPagamento = itemImportado.dataPagamento || despesas[indexExistente].dataPagamento;
+                        despesas[indexExistente].dataLancamento = itemImportado.dataLancamento || despesas[indexExistente].dataLancamento;
                         despesas[indexExistente].tipoDespesa = itemImportado.tipoDespesa || despesas[indexExistente].tipoDespesa;
                         despesas[indexExistente].descricao = itemImportado.descricao || despesas[indexExistente].descricao;
                         atualizados++;
@@ -1404,7 +1422,7 @@
                 }
 
                 localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
-                alert(`Despesas importadas!\n• ${novos} novos itens.\n• ${atualizados} itens atualizados.`);
+                alert(`Despesas importadas!\n• ${novos} novos itens.\n• ${atualizados} itens atualizados pelo código.`);
                 updateAll();
             };
             reader.readAsArrayBuffer(file);
@@ -1497,24 +1515,25 @@
         }
 
         function exportDespesasModel() {
+            // ORDEM EXATA SOLICITADA PARA A PLANILHA MODELO
             const dataToExport = despesas.length ? despesas.map(d => ({
-                'Código': d.codigo,
-                'Data Vencimento': d.dataVencimento,
-                'Data Pagamento': d.dataPagamento,
-                'Tipo de Despesa': d.tipoDespesa,
-                'Descrição': d.descricao,
-                'Valor Lançado (R$)': d.valor,
-                'Valor Pago (R$)': d.valorPago !== undefined ? d.valorPago : (d.status === 'Pago' ? d.valor : 0),
-                'Status': d.status
+                'Codigo': d.codigo || 1,
+                'Lançamento': d.dataLancamento || '',
+                'Tipo Despesa': d.tipoDespesa || '',
+                'Descrição': d.descricao || '',
+                'Mês': d.mes || '',
+                'Valor Total': d.valor || 0,
+                'Valor Pago': d.valorPago || 0,
+                'Vencimento': d.dataVencimento || ''
             })) : [{
-                'Código': '01',
-                'Data Vencimento': '2026-01-10',
-                'Data Pagamento': '2026-01-10',
-                'Tipo de Despesa': 'Operacional',
+                'Codigo': 1,
+                'Lançamento': '2026-01-05',
+                'Tipo Despesa': 'Operacional',
                 'Descrição': 'Exemplo de Despesa',
-                'Valor Lançado (R$)': 1500.00,
-                'Valor Pago (R$)': 1500.00,
-                'Status': 'Pago'
+                'Mês': 'Janeiro',
+                'Valor Total': 1500.00,
+                'Valor Pago': 0,
+                'Vencimento': '2026-01-15'
             }];
             const ws = XLSX.utils.json_to_sheet(dataToExport);
             const wb = XLSX.utils.book_new();
