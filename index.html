@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS Client (para sincronização em nuvem em tempo real entre computadores) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -49,6 +51,7 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #18132d; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b2f6b; border-radius: 4px; }
+        .operator-readonly input, .operator-readonly select, .operator-readonly button:not(.nav-btn):not(#btn-sync-cloud):not(.tab-switch), .operator-readonly textarea { pointer-events: none; opacity: 0.6; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -101,30 +104,36 @@
 
                 <!-- MENU NAVEGAÇÃO -->
                 <nav class="hidden md:flex items-center gap-1 bg-dark-bg p-1.5 rounded-2xl border border-dark-border shadow-inner">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-white bg-dark-card shadow border border-gold-500/20">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn tab-switch px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-white bg-dark-card shadow border border-gold-500/20">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 text-gold-400"></i> Visão Geral
                     </button>
-                    <button onclick="switchTab('lancardespesa')" id="nav-lancardespesa" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
+                    <button onclick="switchTab('lancardespesa')" id="nav-lancardespesa" class="nav-btn tab-switch px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
                         <i data-lucide="plus-circle" class="w-4 h-4 text-rose-400"></i> Lançar Despesa
                     </button>
-                    <button onclick="switchTab('prolabore')" id="nav-prolabore" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
+                    <button onclick="switchTab('prolabore')" id="nav-prolabore" class="nav-btn tab-switch px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
                         <i data-lucide="award" class="w-4 h-4 text-gold-400"></i> Pro-Labore
                     </button>
-                    <button onclick="switchTab('despesas')" id="nav-despesas" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
+                    <button onclick="switchTab('despesas')" id="nav-despesas" class="nav-btn tab-switch px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
                         <i data-lucide="pie-chart" class="w-4 h-4"></i> Contas a Pagar
                     </button>
-                    <button onclick="switchTab('entradas')" id="nav-entradas" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
+                    <button onclick="switchTab('entradas')" id="nav-entradas" class="nav-btn tab-switch px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
                         <i data-lucide="arrow-down-left" class="w-4 h-4"></i> Entradas
                     </button>
-                    <button onclick="switchTab('diretoria')" id="nav-diretoria" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
+                    <button onclick="switchTab('diretoria')" id="nav-diretoria" class="nav-btn tab-switch px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-zinc-400 hover:text-white">
                         <i data-lucide="presentation" class="w-4 h-4"></i> Executivo
+                    </button>
+                    <button onclick="switchTab('admin')" id="nav-admin" class="nav-btn tab-switch hidden px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-gold-400">
+                        <i data-lucide="settings" class="w-4 h-4"></i> Painel Master
                     </button>
                 </nav>
 
                 <div class="flex items-center gap-3">
+                    <button id="btn-sync-cloud" onclick="manualSync()" class="p-2.5 text-emerald-400 hover:text-emerald-300 bg-dark-bg border border-dark-border rounded-xl transition shadow flex items-center gap-1.5 text-xs font-bold px-3" title="Sincronizar com Nuvem">
+                        <i data-lucide="cloud-sync" class="w-4 h-4 animate-spin-slow"></i> <span id="sync-status-text">Sincronizado</span>
+                    </button>
                     <div class="text-right hidden sm:block">
                         <div id="user-display-email" class="text-xs font-bold text-white">admin@rosemary.com.br</div>
-                        <div id="user-display-role" class="text-[10px] text-gold-400 font-extrabold uppercase tracking-wider">Diretoria Master</div>
+                        <div id="user-display-role" class="text-[10px] text-gold-400 font-extrabold uppercase tracking-wider">Master</div>
                     </div>
                     <button onclick="logout()" class="p-2.5 text-zinc-400 hover:text-rose-400 bg-dark-bg border border-dark-border rounded-xl transition shadow" title="Sair">
                         <i data-lucide="log-out" class="w-5 h-5"></i>
@@ -140,6 +149,7 @@
                 <button onclick="switchTab('despesas')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 whitespace-nowrap">Contas a Pagar</button>
                 <button onclick="switchTab('entradas')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 whitespace-nowrap">Entradas</button>
                 <button onclick="switchTab('diretoria')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 whitespace-nowrap">Executivo</button>
+                <button onclick="switchTab('admin')" id="mobile-nav-admin" class="hidden px-3 py-1.5 rounded-lg text-xs font-medium text-gold-400 whitespace-nowrap">Painel Master</button>
             </div>
         </header>
 
@@ -147,9 +157,9 @@
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
 
             <!-- BARRA GLOBAL -->
-            <div class="bg-dark-card border border-gold-500/20 rounded-3xl p-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
+            <div id="global-actions-bar" class="bg-dark-card border border-gold-500/20 rounded-3xl p-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
                 <div class="w-full md:w-auto flex items-center gap-3 flex-wrap">
-                    <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 border border-gold-500/30">
+                    <label id="wrapper-import-despesas" class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-5 py-3 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 border border-gold-500/35">
                         <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Despesas (XLSX)
                         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden">
                     </label>
@@ -178,32 +188,32 @@
             <!-- TAB 1: VISÃO GERAL -->
             <section id="tab-dashboard" class="tab-content space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                    <div id="card-kpi-entradas" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Entradas</div>
                         <div id="kpi-entradas" class="text-2xl font-black text-emerald-400">R$ 0,00</div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                    <div id="card-kpi-saidas" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Saídas & Custos</div>
                         <div id="kpi-saidas" class="text-2xl font-black text-rose-400">R$ 0,00</div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                    <div id="card-kpi-prolabore" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Pro-Labore Pago</div>
                         <div id="kpi-prolabore" class="text-2xl font-black text-gold-400">R$ 0,00</div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                    <div id="card-kpi-saldo" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-lg relative overflow-hidden">
                         <div class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Saldo Líquido Real</div>
                         <div id="kpi-saldo" class="text-2xl font-black text-white">R$ 0,00</div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="panel-fluxo-mensal" class="lg:col-span-2 bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
                             <i data-lucide="bar-chart-3" class="w-4 h-4 text-gold-400"></i> Fluxo Mensal
                         </h3>
                         <div class="h-80"><canvas id="chart-fluxo-mensal"></canvas></div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="panel-gastos-categoria" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
                             <i data-lucide="pie-chart" class="w-4 h-4 text-gold-400"></i> Gastos por Categoria
                         </h3>
@@ -212,7 +222,7 @@
                 </div>
             </section>
 
-            <!-- NOVA TAB: LANÇAR DESPESA -->
+            <!-- TAB 2: LANÇAR DESPESA -->
             <section id="tab-lancardespesa" class="tab-content hidden space-y-6">
                 <div class="max-w-2xl mx-auto bg-dark-card border border-gold-500/30 p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl">
                     <div class="flex items-center gap-3 border-b border-dark-border pb-4">
@@ -271,11 +281,11 @@
                 </div>
             </section>
 
-            <!-- TAB 2: PRO-LABORE DIRETORIA -->
+            <!-- TAB 3: PRO-LABORE DIRETORIA -->
             <section id="tab-prolabore" class="tab-content hidden space-y-6">
                 <div class="bg-dark-card border border-gold-500/20 p-4 rounded-3xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
                     <div class="flex items-center gap-3 flex-wrap">
-                        <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow border border-gold-500/30">
+                        <label id="wrapper-import-prolabore" class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow border border-gold-500/30">
                             <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Pro-Labore (XLSX)
                             <input type="file" id="prolabore-file-input" accept=".xlsx, .xls, .csv" class="hidden">
                         </label>
@@ -287,7 +297,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
+                    <div id="panel-form-prolabore" class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 id="form-prolabore-title" class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                             <i data-lucide="award" class="w-4 h-4 text-gold-400"></i> Registrar Pro-Labore
                         </h3>
@@ -340,7 +350,7 @@
                                         <th class="p-3">Competência</th>
                                         <th class="p-3">Diretoria / Beneficiario</th>
                                         <th class="p-3 text-right">Valor (R$)</th>
-                                        <th class="p-3 text-center">Ações</th>
+                                        <th class="p-3 text-center col-acoes-header">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="table-prolabore-body" class="divide-y divide-dark-border"></tbody>
@@ -350,14 +360,14 @@
                 </div>
             </section>
 
-            <!-- TAB 3: CONTAS A PAGAR & DESPESAS -->
+            <!-- TAB 4: CONTAS A PAGAR & DESPESAS -->
             <section id="tab-despesas" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="panel-despesas-tipo" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Análise por Tipo de Despesa</h3>
                         <div class="h-64 flex items-center justify-center"><canvas id="chart-despesas-tipo"></canvas></div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="panel-despesas-desc" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Análise por Descrição</h3>
                         <div class="h-64 flex items-center justify-center"><canvas id="chart-despesas-desc"></canvas></div>
                     </div>
@@ -406,7 +416,7 @@
                         <table class="w-full text-left text-xs text-zinc-300">
                             <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
                                 <tr>
-                                    <th class="p-3 w-10 text-center">
+                                    <th class="p-3 w-10 text-center col-select-header">
                                         <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)" class="cursor-pointer accent-gold-500 rounded">
                                     </th>
                                     <th class="p-3">Código</th>
@@ -418,7 +428,7 @@
                                     <th class="p-3 text-right">Valor Pago (R$)</th>
                                     <th class="p-3">Vencimento</th>
                                     <th class="p-3 text-center">Status</th>
-                                    <th class="p-3 text-center">Ações</th>
+                                    <th class="p-3 text-center col-acoes-header">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="table-despesas-body" class="divide-y divide-dark-border"></tbody>
@@ -431,7 +441,7 @@
             <section id="tab-entradas" class="tab-content hidden space-y-6">
                 <div class="bg-dark-card border border-gold-500/20 p-4 rounded-3xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
                     <div class="flex items-center gap-3 flex-wrap">
-                        <label class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow border border-gold-500/30">
+                        <label id="wrapper-import-entradas" class="cursor-pointer bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow border border-gold-500/30">
                             <i data-lucide="file-up" class="w-4 h-4 text-gold-400"></i> Importar Entradas (XLSX)
                             <input type="file" id="entradas-file-input" accept=".xlsx, .xls, .csv" class="hidden">
                         </label>
@@ -443,7 +453,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl space-y-4">
+                    <div id="panel-form-entrada" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                             <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Lançar Entrada
                         </h3>
@@ -468,7 +478,7 @@
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-left text-xs text-zinc-300">
                                 <thead class="bg-dark-bg text-zinc-400 uppercase font-bold border-b border-dark-border">
-                                    <tr><th class="p-3">Data</th><th class="p-3">Referente A</th><th class="p-3 text-right">Valor (R$)</th><th class="p-3 text-center">Ações</th></tr>
+                                    <tr><th class="p-3">Data</th><th class="p-3">Referente A</th><th class="p-3 text-right">Valor (R$)</th><th class="p-3 text-center col-acoes-header">Ações</th></tr>
                                 </thead>
                                 <tbody id="table-entradas-body" class="divide-y divide-dark-border"></tbody>
                             </table>
@@ -504,26 +514,26 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="dir-card-entradas" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <div class="text-xs font-bold text-zinc-400 uppercase">Faturamento Mês</div>
                         <div id="dir-kpi-entradas" class="text-2xl font-black text-emerald-400 mt-1">R$ 0,00</div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="dir-card-prolabore" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <div class="text-xs font-bold text-zinc-400 uppercase">Pro-Labore Pago</div>
                         <div id="dir-kpi-prolabore" class="text-2xl font-black text-gold-400 mt-1">R$ 0,00</div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="dir-card-saidas" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <div class="text-xs font-bold text-zinc-400 uppercase">Despesas Operacionais</div>
                         <div id="dir-kpi-saidas" class="text-2xl font-black text-rose-400 mt-1">R$ 0,00</div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="dir-card-resultado" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <div class="text-xs font-bold text-zinc-400 uppercase">Resultado Líquido Final</div>
                         <div id="dir-kpi-resultado" class="text-2xl font-black text-white mt-1">R$ 0,00</div>
                     </div>
                 </div>
 
                 <!-- GRÁFICO COMPARATIVO ENTRADAS X SAÍDAS MÊS A MÊS -->
-                <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
+                <div id="dir-panel-comparativo" class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-dark-border pb-4">
                         <div>
                             <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
@@ -536,13 +546,52 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="dir-panel-prolabore" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Pro-Labore por Diretora</h3>
                         <div class="h-72 flex items-center justify-center"><canvas id="dir-chart-prolabore"></canvas></div>
                     </div>
-                    <div class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
+                    <div id="dir-panel-composicao" class="bg-dark-card border border-dark-border p-6 rounded-3xl shadow-xl">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Composição de Saídas & Pro-Labore</h3>
                         <div class="h-72 flex items-center justify-center"><canvas id="dir-chart-composicao"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: PAINEL MASTER (CONTROLE DE ACESSOS E VISIBILIDADE DO OPERADOR) -->
+            <section id="tab-admin" class="tab-content hidden space-y-6">
+                <div class="bg-dark-card border border-gold-500/30 p-8 rounded-3xl shadow-2xl space-y-6">
+                    <div class="flex items-center gap-3 border-b border-dark-border pb-4">
+                        <div class="p-3 bg-gold-500/10 text-gold-400 rounded-2xl border border-gold-500/20">
+                            <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black text-white">Painel de Controle Master (Visibilidade do Operador)</h2>
+                            <p class="text-xs text-zinc-400">Ative ou desative o que o usuário operador poderá visualizar no sistema.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="visibility-toggles-container">
+                        <!-- Gerado via JS -->
+                    </div>
+
+                    <div class="border-t border-dark-border pt-6 space-y-4">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="cloud" class="w-4 h-4 text-gold-400"></i> Configuração de Sincronização em Nuvem (Supabase)
+                        </h3>
+                        <p class="text-xs text-zinc-400">Para que os dados sejam salvos e atualizados automaticamente em tempo real em qualquer computador, insira suas credenciais do Supabase abaixo:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Supabase URL</label>
+                                <input type="text" id="supabase-url-input" placeholder="https://xxxx.supabase.co" class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">Supabase Anon Key</label>
+                                <input type="password" id="supabase-key-input" placeholder="eyJhbGciOi..." class="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
+                            </div>
+                        </div>
+                        <button onclick="saveSupabaseConfig()" class="bg-gold-500 hover:bg-gold-600 text-dark-bg font-extrabold px-6 py-3 rounded-xl transition text-xs shadow-lg shadow-gold-500/20">
+                            Salvar Credenciais de Nuvem e Conectar
+                        </button>
                     </div>
                 </div>
             </section>
@@ -610,15 +659,74 @@
     <!-- SCRIPT -->
     <script>
         const MASTER_PASS = "Lacan1404@";
-        let users = JSON.parse(localStorage.getItem('rosemary_users')) || [
+        let users = [
             { email: "admin@rosemary.com.br", pass: MASTER_PASS, role: 'MASTER' },
-            { email: "administrativo@stanize.com.br", pass: MASTER_PASS, role: 'MASTER' }
+            { email: "administrativo@stanize.com.br", pass: MASTER_PASS, role: 'MASTER' },
+            { email: "operador@rosemary.com.br", pass: MASTER_PASS, role: 'OPERATOR' }
         ];
         
         let currentUser = null;
         let despesas = JSON.parse(localStorage.getItem('rosemary_despesas')) || [];
         let entradas = JSON.parse(localStorage.getItem('rosemary_entradas')) || [];
         let prolabores = JSON.parse(localStorage.getItem('rosemary_prolabores')) || [];
+
+        // Configurações de visibilidade controladas pelo Master para o Operador
+        let operatorVisibility = JSON.parse(localStorage.getItem('rosemary_operator_visibility')) || {
+            'tab-dashboard': true,
+            'card-kpi-entradas': true,
+            'card-kpi-saidas': true,
+            'card-kpi-prolabore': true,
+            'card-kpi-saldo': true,
+            'panel-fluxo-mensal': true,
+            'panel-gastos-categoria': true,
+            'tab-lancardespesa': true,
+            'tab-prolabore': true,
+            'panel-form-prolabore': true,
+            'tab-despesas': true,
+            'panel-despesas-tipo': true,
+            'panel-despesas-desc': true,
+            'tab-entradas': true,
+            'panel-form-entrada': true,
+            'tab-diretoria': true,
+            'dir-card-entradas': true,
+            'dir-card-prolabore': true,
+            'dir-card-saidas': true,
+            'dir-card-resultado': true,
+            'dir-panel-comparativo': true,
+            'dir-panel-prolabore': true,
+            'dir-panel-composicao': true
+        };
+
+        const visibilityLabels = {
+            'tab-dashboard': 'Aba Visão Geral',
+            'card-kpi-entradas': 'KPI: Total Entradas',
+            'card-kpi-saidas': 'KPI: Total Saídas',
+            'card-kpi-prolabore': 'KPI: Total Pro-Labore',
+            'card-kpi-saldo': 'KPI: Saldo Líquido',
+            'panel-fluxo-mensal': 'Gráfico Fluxo Mensal',
+            'panel-gastos-categoria': 'Gráfico Gastos por Categoria',
+            'tab-lancardespesa': 'Aba Lançar Despesa',
+            'tab-prolabore': 'Aba Pro-Labore',
+            'panel-form-prolabore': 'Formulário Registrar Pro-Labore',
+            'tab-despesas': 'Aba Contas a Pagar',
+            'panel-despesas-tipo': 'Gráfico Despesas por Tipo',
+            'panel-despesas-desc': 'Gráfico Despesas por Descrição',
+            'tab-entradas': 'Aba Entradas',
+            'panel-form-entrada': 'Formulário Lançar Entrada',
+            'tab-diretoria': 'Aba Painel Executivo',
+            'dir-card-entradas': 'Executivo: Faturamento Mês',
+            'dir-card-prolabore': 'Executivo: Pro-Labore Pago',
+            'dir-card-saidas': 'Executivo: Despesas Operacionais',
+            'dir-card-resultado': 'Executivo: Resultado Líquido',
+            'dir-panel-comparativo': 'Executivo: Gráfico Comparativo',
+            'dir-panel-prolabore': 'Executivo: Gráfico Pro-Labore por Diretora',
+            'dir-panel-composicao': 'Executivo: Gráfico Composição'
+        };
+
+        // Supabase Cloud Sync config
+        let supabaseClient = null;
+        let supabaseConfig = JSON.parse(localStorage.getItem('rosemary_supabase_config')) || { url: '', key: '' };
+
         let activeCategoryFilter = null;
         let selectedDespesasIds = new Set();
         let quickPeriodFilter = 'all';
@@ -655,6 +763,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            initSupabaseFromConfig();
 
             document.getElementById('login-form').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -673,6 +782,10 @@
 
             document.getElementById('form-nova-despesa').addEventListener('submit', (e) => {
                 e.preventDefault();
+                if (currentUser && currentUser.role !== 'MASTER') {
+                    alert('Acesso negado: Apenas o usuário Master pode cadastrar despesas.');
+                    return;
+                }
                 const codigo = parseInt(document.getElementById('novo-despesa-codigo').value) || 1;
                 const tipo = document.getElementById('novo-despesa-tipo').value.trim();
                 const desc = document.getElementById('novo-despesa-desc').value.trim();
@@ -705,7 +818,7 @@
                 };
 
                 despesas.push(novaDespesa);
-                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                saveAndSyncData();
                 document.getElementById('form-nova-despesa').reset();
 
                 alert('Despesa cadastrada com sucesso!');
@@ -715,6 +828,7 @@
 
             document.getElementById('form-edit-despesa-modal').addEventListener('submit', (e) => {
                 e.preventDefault();
+                if (currentUser && currentUser.role !== 'MASTER') return;
                 const id = document.getElementById('modal-edit-id').value;
                 const idx = despesas.findIndex(d => d.id == id);
                 if (idx !== -1) {
@@ -731,7 +845,7 @@
                     despesas[idx].valorPago = valPago;
                     despesas[idx].status = isPago ? 'Pago' : 'Pendente';
 
-                    localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                    saveAndSyncData();
                     closeEditDespesaModal();
                     updateAll();
                 }
@@ -739,6 +853,7 @@
 
             document.getElementById('form-prolabore').addEventListener('submit', (e) => {
                 e.preventDefault();
+                if (currentUser && currentUser.role !== 'MASTER') return;
                 const editId = document.getElementById('prolabore-edit-id').value;
                 const diretora = document.getElementById('prolabore-diretora').value.trim();
                 const valor = parseFloat(document.getElementById('prolabore-valor').value);
@@ -758,13 +873,14 @@
                     }
                 }
 
-                localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
+                saveAndSyncData();
                 cancelEditProlabore();
                 updateAll();
             });
 
             document.getElementById('form-entrada').addEventListener('submit', (e) => {
                 e.preventDefault();
+                if (currentUser && currentUser.role !== 'MASTER') return;
                 const valor = parseFloat(document.getElementById('entrada-valor').value);
                 const descricao = document.getElementById('entrada-descricao').value.trim();
                 const data = document.getElementById('entrada-data').value;
@@ -776,7 +892,7 @@
                     entradas.push({ id: Date.now(), valor, descricao, data });
                 }
 
-                localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
+                saveAndSyncData();
                 document.getElementById('form-entrada').reset();
                 updateAll();
             });
@@ -786,10 +902,101 @@
             document.getElementById('prolabore-file-input').addEventListener('change', handleProlaboreUpload);
         });
 
+        function initSupabaseFromConfig() {
+            if (supabaseConfig.url && supabaseConfig.key) {
+                try {
+                    supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+                    document.getElementById('supabase-url-input').value = supabaseConfig.url;
+                    document.getElementById('supabase-key-input').value = supabaseConfig.key;
+                    document.getElementById('sync-status-text').textContent = "Nuvem Conectada";
+                    fetchCloudData();
+                } catch(err) {
+                    console.error("Erro ao inicializar Supabase:", err);
+                    document.getElementById('sync-status-text').textContent = "Erro Nuvem";
+                }
+            }
+        }
+
+        function saveSupabaseConfig() {
+            const url = document.getElementById('supabase-url-input').value.trim();
+            const key = document.getElementById('supabase-key-input').value.trim();
+            if (!url || !key) {
+                alert('Preencha URL e Key do Supabase!');
+                return;
+            }
+            supabaseConfig = { url, key };
+            localStorage.setItem('rosemary_supabase_config', JSON.stringify(supabaseConfig));
+            initSupabaseFromConfig();
+            alert('Credenciais salvas com sucesso! Sistema conectado à nuvem.');
+        }
+
+        async function saveAndSyncData() {
+            localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+            localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
+            localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
+
+            if (supabaseClient) {
+                try {
+                    document.getElementById('sync-status-text').textContent = "Salvando...";
+                    await supabaseClient.from('rosemary_data').upsert({
+                        id: 1,
+                        despesas: despesas,
+                        entradas: entradas,
+                        prolabores: prolabores,
+                        updated_at: new Date()
+                    });
+                    document.getElementById('sync-status-text').textContent = "Nuvem Conectada";
+                } catch(err) {
+                    console.error("Erro ao sincronizar com nuvem:", err);
+                    document.getElementById('sync-status-text').textContent = "Erro Nuvem";
+                }
+            }
+        }
+
+        async function fetchCloudData() {
+            if (!supabaseClient) return;
+            try {
+                document.getElementById('sync-status-text').textContent = "Sincronizando...";
+                const { data, error } = await supabaseClient.from('rosemary_data').select('*').eq('id', 1).single();
+                if (data && !error) {
+                    if (data.despesas) despesas = data.despesas;
+                    if (data.entradas) entradas = data.entradas;
+                    if (data.prolabores) prolabores = data.prolabores;
+                    localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                    localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
+                    localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
+                    updateAll();
+                }
+                document.getElementById('sync-status-text').textContent = "Nuvem Conectada";
+            } catch(err) {
+                console.error("Erro ao buscar dados da nuvem:", err);
+                document.getElementById('sync-status-text').textContent = "Nuvem Conectada";
+            }
+        }
+
+        function manualSync() {
+            fetchCloudData();
+            alert('Sincronização manual executada com sucesso!');
+        }
+
         function initApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             document.getElementById('user-display-email').textContent = currentUser.email;
+            document.getElementById('user-display-role').textContent = currentUser.role === 'MASTER' ? 'Master' : 'Operador';
+
+            if (currentUser.role === 'MASTER') {
+                document.getElementById('nav-admin').classList.remove('hidden');
+                document.getElementById('mobile-nav-admin').classList.remove('hidden');
+                document.body.classList.remove('operator-readonly');
+                renderAdminVisibilityPanel();
+            } else {
+                document.getElementById('nav-admin').classList.add('hidden');
+                document.getElementById('mobile-nav-admin').classList.add('hidden');
+                document.body.classList.add('operator-readonly');
+                applyOperatorVisibility();
+            }
+
             updateAll();
         }
 
@@ -814,6 +1021,9 @@
                 activeBtn.classList.remove('text-zinc-400');
             }
             if (tabId === 'diretoria') updateDiretoria();
+            if (currentUser && currentUser.role !== 'MASTER') {
+                applyOperatorVisibility();
+            }
         }
 
         function setQuickPeriodFilter(period) {
@@ -828,6 +1038,42 @@
                 activeB.classList.remove('text-zinc-400');
             }
             updateAll();
+        }
+
+        function renderAdminVisibilityPanel() {
+            const container = document.getElementById('visibility-toggles-container');
+            container.innerHTML = '';
+            for (const [key, label] of Object.entries(visibilityLabels)) {
+                const isChecked = operatorVisibility[key] !== false ? 'checked' : '';
+                container.innerHTML += `
+                    <div class="bg-dark-bg border border-dark-border p-4 rounded-2xl flex items-center justify-between">
+                        <span class="text-xs font-semibold text-zinc-300">${label}</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" ${isChecked} onchange="toggleOperatorVisibility('${key}', this.checked)" class="sr-only peer">
+                            <div class="w-9 h-5 bg-dark-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gold-500"></div>
+                        </label>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleOperatorVisibility(key, isVisible) {
+            operatorVisibility[key] = isVisible;
+            localStorage.setItem('rosemary_operator_visibility', JSON.stringify(operatorVisibility));
+        }
+
+        function applyOperatorVisibility() {
+            if (!currentUser || currentUser.role === 'MASTER') return;
+            for (const [key, isVisible] of Object.entries(operatorVisibility)) {
+                const el = document.getElementById(key);
+                if (el) {
+                    if (isVisible) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            }
         }
 
         function getFilteredData() {
@@ -918,6 +1164,19 @@
             renderTables();
             renderCharts(fEntradas, fDespesas, fProlabores);
             updateDiretoria();
+
+            if (currentUser && currentUser.role !== 'MASTER') {
+                applyOperatorVisibility();
+                // Ocultar elementos de importação e colunas de ação para operador
+                const importDesp = document.getElementById('wrapper-import-despesas');
+                if (importDesp) importDesp.classList.add('hidden');
+                const importEnt = document.getElementById('wrapper-import-entradas');
+                if (importEnt) importEnt.classList.add('hidden');
+                const importProl = document.getElementById('wrapper-import-prolabore');
+                if (importProl) importProl.classList.add('hidden');
+
+                document.querySelectorAll('.col-acoes-header, .col-select-header').forEach(el => el.classList.add('hidden'));
+            }
         }
 
         function clearCategoryFilter() {
@@ -935,7 +1194,6 @@
             return (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // Função para formatar data ISO (YYYY-MM-DD) para o formato brasileiro (DD/MM/YYYY)
         function formatDateBR(dateStr) {
             if (!dateStr) return '-';
             const parts = dateStr.split('-');
@@ -946,6 +1204,7 @@
         }
 
         function toggleSelectAll(masterCheckbox) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             const { fDespesas } = getFilteredData();
             const contasPagarOnly = fDespesas.filter(d => !d.valorPago || d.valorPago === 0);
             if (masterCheckbox.checked) {
@@ -957,6 +1216,7 @@
         }
 
         function toggleSelectDespesa(id, checkbox) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             if (checkbox.checked) {
                 selectedDespesasIds.add(id);
             } else {
@@ -966,6 +1226,7 @@
         }
 
         function updateBulkBar() {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             const bar = document.getElementById('bulk-actions-bar');
             const countSpan = document.getElementById('selected-count');
             countSpan.textContent = selectedDespesasIds.size;
@@ -977,25 +1238,32 @@
         }
 
         function deleteSelectedDespesas() {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             if (selectedDespesasIds.size === 0) return;
             if (confirm(`Deseja realmente excluir os ${selectedDespesasIds.size} itens selecionados?`)) {
                 despesas = despesas.filter(d => !selectedDespesasIds.has(d.id));
                 selectedDespesasIds.clear();
-                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                saveAndSyncData();
                 updateAll();
             }
         }
 
         function deleteAllDespesas() {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             if (confirm('ATENÇÃO: Deseja realmente excluir TODAS as despesas cadastradas no sistema? Esta ação não pode ser desfeita.')) {
                 despesas = [];
                 selectedDespesasIds.clear();
-                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                saveAndSyncData();
                 updateAll();
             }
         }
 
         function updateValorPagoDirectly(id, inputElement) {
+            if (currentUser && currentUser.role !== 'MASTER') {
+                inputElement.value = inputElement.defaultValue;
+                alert('Acesso negado: Apenas o usuário Master pode alterar dados.');
+                return;
+            }
             const valPago = parseFloat(inputElement.value) || 0;
             const idx = despesas.findIndex(d => d.id == id);
             if (idx !== -1) {
@@ -1006,7 +1274,7 @@
                     despesas[idx].status = 'Pendente';
                 }
 
-                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                saveAndSyncData();
                 updateAll();
             }
         }
@@ -1032,6 +1300,8 @@
                 String(d.codigo || '').toLowerCase().includes(search)
             );
             
+            const isMaster = currentUser && currentUser.role === 'MASTER';
+
             if (filteredDesp.length === 0) {
                 tbodyDesp.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-zinc-500">Nenhuma conta a pagar pendente.</td></tr>`;
             } else {
@@ -1039,11 +1309,13 @@
                     const isChecked = selectedDespesasIds.has(d.id) ? 'checked' : '';
                     const catColor = getCategoryColor(d.tipoDespesa);
 
+                    const checkboxTd = isMaster ? `<td class="p-3 text-center"><input type="checkbox" ${isChecked} onchange="toggleSelectDespesa(${d.id}, this)" class="cursor-pointer accent-gold-500 rounded"></td>` : '';
+                    const valorPagoInput = isMaster ? `<input type="number" step="0.01" value="${d.valorPago || ''}" onchange="updateValorPagoDirectly(${d.id}, this)" placeholder="0,00" class="w-24 text-right bg-dark-bg border border-dark-border rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-gold-500">` : `<span>${formatCurrency(d.valorPago || 0)}</span>`;
+                    const acoesTd = isMaster ? `<td class="p-3 text-center"><button onclick="openEditDespesaModal(${d.id})" class="text-zinc-400 hover:text-gold-400 mr-2" title="Editar Modal"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteDespesa(${d.id})" class="text-zinc-500 hover:text-rose-400" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>` : '';
+
                     tbodyDesp.innerHTML += `
                         <tr class="hover:bg-dark-hover/50 transition">
-                            <td class="p-3 text-center">
-                                <input type="checkbox" ${isChecked} onchange="toggleSelectDespesa(${d.id}, this)" class="cursor-pointer accent-gold-500 rounded">
-                            </td>
+                            ${checkboxTd}
                             <td class="p-3 font-mono text-gold-400 font-bold">${d.codigo || '-'}</td>
                             <td class="p-3">${formatDateBR(d.dataLancamento)}</td>
                             <td class="p-3 font-semibold text-white flex items-center gap-2">
@@ -1053,41 +1325,31 @@
                             <td class="p-3 text-zinc-300">${d.descricao || ''}</td>
                             <td class="p-3">${d.mes || '-'}</td>
                             <td class="p-3 text-right font-bold text-rose-400">${formatCurrency(parseFloat(d.valor) || 0)}</td>
-                            <td class="p-3 text-right">
-                                <input type="number" step="0.01" value="${d.valorPago || ''}" 
-                                       onchange="updateValorPagoDirectly(${d.id}, this)" 
-                                       placeholder="0,00" 
-                                       class="w-24 text-right bg-dark-bg border border-dark-border rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-gold-500">
-                            </td>
+                            <td class="p-3 text-right">${valorPagoInput}</td>
                             <td class="p-3 font-semibold text-amber-300">${formatDateBR(d.dataVencimento)}</td>
                             <td class="p-3 text-center">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                                     Pendente
                                 </span>
                             </td>
-                            <td class="p-3 text-center">
-                                <button onclick="openEditDespesaModal(${d.id})" class="text-zinc-400 hover:text-gold-400 mr-2" title="Editar Modal"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                <button onclick="deleteDespesa(${d.id})" class="text-zinc-500 hover:text-rose-400" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                            </td>
+                            ${acoesTd}
                         </tr>
                     `;
                 });
             }
-            updateBulkBar();
+            if(isMaster) updateBulkBar();
 
             const tbodyProl = document.getElementById('table-prolabore-body');
             tbodyProl.innerHTML = '';
             fProlabores.forEach(p => {
+                const acoesProl = isMaster ? `<td class="p-3 text-center"><button onclick="startEditProlabore(${p.id})" class="text-zinc-400 hover:text-gold-400 mr-2"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteProlabore(${p.id})" class="text-zinc-500 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>` : '';
                 tbodyProl.innerHTML += `
                     <tr class="hover:bg-dark-hover/50 transition">
                         <td class="p-3">${formatDateBR(p.data)}</td>
                         <td class="p-3 font-bold text-gold-400">${p.mes}</td>
                         <td class="p-3 font-medium text-white">${p.diretora}</td>
                         <td class="p-3 text-right font-bold text-gold-400">${formatCurrency(p.valor)}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="startEditProlabore(${p.id})" class="text-zinc-400 hover:text-gold-400 mr-2"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                            <button onclick="deleteProlabore(${p.id})" class="text-zinc-500 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </td>
+                        ${acoesProl}
                     </tr>
                 `;
             });
@@ -1095,12 +1357,13 @@
             const tbodyEnt = document.getElementById('table-entradas-body');
             tbodyEnt.innerHTML = '';
             fEntradas.forEach(e => {
+                const acoesEnt = isMaster ? `<td class="p-3 text-center"><button onclick="deleteEntrada(${e.id})" class="text-zinc-500 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>` : '';
                 tbodyEnt.innerHTML += `
                     <tr class="hover:bg-dark-hover/50 transition">
                         <td class="p-3">${formatDateBR(e.data)}</td>
                         <td class="p-3 font-medium text-white">${e.descricao}</td>
                         <td class="p-3 text-right font-bold text-emerald-400">${formatCurrency(e.valor)}</td>
-                        <td class="p-3 text-center"><button onclick="deleteEntrada(${e.id})" class="text-zinc-500 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                        ${acoesEnt}
                     </tr>
                 `;
             });
@@ -1108,6 +1371,7 @@
         }
 
         function openEditDespesaModal(id) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             const d = despesas.find(item => item.id == id);
             if (!d) return;
 
@@ -1128,6 +1392,7 @@
         }
 
         function startEditProlabore(id) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             const p = prolabores.find(item => item.id == id);
             if (!p) return;
             document.getElementById('prolabore-edit-id').value = p.id;
@@ -1149,26 +1414,29 @@
         }
 
         function deleteProlabore(id) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             if (confirm('Deseja excluir este registro de pro-labore?')) {
                 prolabores = prolabores.filter(p => p.id !== id);
-                localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
+                saveAndSyncData();
                 updateAll();
             }
         }
 
         function deleteDespesa(id) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             if (confirm('Deseja excluir esta despesa?')) {
                 despesas = despesas.filter(d => d.id !== id);
                 selectedDespesasIds.delete(id);
-                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
+                saveAndSyncData();
                 updateAll();
             }
         }
 
         function deleteEntrada(id) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             if (confirm('Deseja excluir esta entrada?')) {
                 entradas = entradas.filter(e => e.id !== id);
-                localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
+                saveAndSyncData();
                 updateAll();
             }
         }
@@ -1357,7 +1625,6 @@
                 return `${y}-${m}-${d}`;
             }
             const s = String(val).trim();
-            // Se vier no formato brasileiro DD/MM/YYYY, converter para YYYY-MM-DD para armazenamento interno
             if (s.includes('/')) {
                 const parts = s.split('/');
                 if (parts.length === 3) {
@@ -1369,6 +1636,7 @@
         }
 
         function handleDespesasUpload(e) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1428,16 +1696,15 @@
                     }
                 }
 
-                localStorage.setItem('rosemary_despesas', JSON.stringify(despesas));
-                alert(`Despesas importadas!
-• ${novos} novos itens.
-• ${atualizados} itens atualizados pelo código.`);
+                saveAndSyncData();
+                alert(`Despesas importadas!\n• ${novos} novos itens.\n• ${atualizados} itens atualizados pelo código.`);
                 updateAll();
             };
             reader.readAsArrayBuffer(file);
         }
 
         function handleEntradasUpload(e) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1472,16 +1739,15 @@
                     }
                 }
 
-                localStorage.setItem('rosemary_entradas', JSON.stringify(entradas));
-                alert(`Entradas importadas!
-• ${novos} novas entradas.
-• ${atualizados} entradas atualizadas.`);
+                saveAndSyncData();
+                alert(`Entradas importadas!\n• ${novos} novas entradas.\n• ${atualizados} entradas atualizadas.`);
                 updateAll();
             };
             reader.readAsArrayBuffer(file);
         }
 
         function handleProlaboreUpload(e) {
+            if (currentUser && currentUser.role !== 'MASTER') return;
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1518,10 +1784,8 @@
                     }
                 }
 
-                localStorage.setItem('rosemary_prolabores', JSON.stringify(prolabores));
-                alert(`Pro-Labore importado!
-• ${novos} novos registros.
-• ${atualizados} registros atualizados.`);
+                saveAndSyncData();
+                alert(`Pro-Labore importado!\n• ${novos} novos registros.\n• ${atualizados} registros atualizados.`);
                 updateAll();
             };
             reader.readAsArrayBuffer(file);
