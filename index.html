@@ -274,10 +274,9 @@
                 </div>
             </section>
 
-            <!-- TAB 3: DESPESAS & SAÍDAS (COM EXCLUSÃO EM MASSA) -->
+            <!-- TAB 3: DESPESAS & SAÍDAS -->
             <section id="tab-despesas" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Formulário de Lançamento Manual de Despesa -->
                     <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 id="form-despesa-title" class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                             <i data-lucide="plus-circle" class="w-4 h-4 text-gold-400"></i> Lançar Nova Despesa
@@ -330,7 +329,6 @@
                         </form>
                     </div>
 
-                    <!-- Tabela e Listagem de Despesas com Ações em Massa -->
                     <div class="lg:col-span-2 bg-dark-card border border-dark-border rounded-3xl p-6 shadow-xl space-y-4">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div>
@@ -343,7 +341,6 @@
                             </div>
                         </div>
 
-                        <!-- Barra de Ações em Massa -->
                         <div id="bulk-actions-bar" class="hidden bg-dark-bg border border-gold-500/40 p-3 rounded-2xl flex items-center justify-between gap-3 animate-fadeIn">
                             <div class="text-xs text-gold-400 font-bold flex items-center gap-2">
                                 <i data-lucide="check-square" class="w-4 h-4"></i>
@@ -439,7 +436,7 @@
                     <div class="space-y-2">
                         <span class="px-3 py-1 bg-gold-500/20 text-gold-400 border border-gold-500/30 rounded-full text-xs font-bold uppercase tracking-wider">Painel Executivo Rosemary</span>
                         <h2 class="text-3xl font-black text-white">Análise de Performance & Pro-Labore</h2>
-                        <p class="text-zinc-300 text-sm">Acompanhe o impacto dos repasses da diretoria frente ao faturamento e despesas.</p>
+                        <p class="text-zinc-300 text-sm">Acompanhe o comparativo mensal de entradas e saídas e repasses da diretoria.</p>
                     </div>
 
                     <div class="bg-dark-bg border border-dark-border p-3 rounded-2xl flex items-center gap-3">
@@ -476,6 +473,19 @@
                         <div class="text-xs font-bold text-zinc-400 uppercase">Resultado Líquido Final</div>
                         <div id="dir-kpi-resultado" class="text-2xl font-black text-white mt-1">R$ 0,00</div>
                     </div>
+                </div>
+
+                <!-- GRÁFICO COMPARATIVO ENTRADAS X SAÍDAS MÊS A MÊS (NOVO) -->
+                <div class="bg-dark-card border border-gold-500/30 p-6 rounded-3xl shadow-xl space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-dark-border pb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <i data-lucide="bar-chart-2" class="w-4 h-4 text-gold-400"></i> Comparativo Mensal: Entradas x Saídas (Gastos)
+                            </h3>
+                            <p class="text-xs text-zinc-400">Análise interativa do faturamento versus custos operacionais e pro-labore</p>
+                        </div>
+                    </div>
+                    <div class="h-80"><canvas id="dir-chart-comparativo-mensal"></canvas></div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -530,7 +540,6 @@
                 }
             });
 
-            // Formulário Despesa Manual
             document.getElementById('form-despesa-manual').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const editId = document.getElementById('despesa-edit-id').value;
@@ -561,7 +570,6 @@
                 updateAll();
             });
 
-            // Formulário Pro-Labore
             document.getElementById('form-prolabore').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const editId = document.getElementById('prolabore-edit-id').value;
@@ -588,7 +596,6 @@
                 updateAll();
             });
 
-            // Formulário Entradas Manual
             document.getElementById('form-entrada').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const valor = parseFloat(document.getElementById('entrada-valor').value);
@@ -607,7 +614,6 @@
                 updateAll();
             });
 
-            // Upload Listeners
             document.getElementById('excel-file-input').addEventListener('change', handleDespesasUpload);
             document.getElementById('entradas-file-input').addEventListener('change', handleEntradasUpload);
             document.getElementById('prolabore-file-input').addEventListener('change', handleProlaboreUpload);
@@ -692,7 +698,6 @@
             return (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // --- GERENCIAMENTO DE SELEÇÃO E EXCLUSÃO EM MASSA DE DESPESAS ---
         function toggleSelectAll(masterCheckbox) {
             const { fDespesas } = getFilteredData();
             if (masterCheckbox.checked) {
@@ -746,7 +751,6 @@
             const { fDespesas, fEntradas, fProlabores } = getFilteredData();
             const search = document.getElementById('search-despesas')?.value.toLowerCase() || '';
 
-            // Tabela Despesas
             const tbodyDesp = document.getElementById('table-despesas-body');
             tbodyDesp.innerHTML = '';
             const filteredDesp = fDespesas.filter(d => (d.descricao || '').toLowerCase().includes(search) || (d.tipoDespesa || '').toLowerCase().includes(search) || String(d.codigo || '').toLowerCase().includes(search));
@@ -779,7 +783,6 @@
             }
             updateBulkBar();
 
-            // Tabela Pro-Labore
             const tbodyProl = document.getElementById('table-prolabore-body');
             tbodyProl.innerHTML = '';
             fProlabores.forEach(p => {
@@ -797,7 +800,6 @@
                 `;
             });
 
-            // Tabela Entradas
             const tbodyEnt = document.getElementById('table-entradas-body');
             tbodyEnt.innerHTML = '';
             fEntradas.forEach(e => {
@@ -929,8 +931,20 @@
             let dEntradas = [...entradas];
             let dProlabores = [...prolabores];
 
+            let monthsLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            let entComp = new Array(12).fill(0);
+            let saiComp = new Array(12).fill(0);
+
+            entradas.forEach(e => { if (e.data) { const m = new Date(e.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) entComp[m] += e.valor; } });
+            despesas.forEach(d => { const dt = d.dataPagamento || d.dataVencimento; if (dt) { const m = new Date(dt + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiComp[m] += d.valor; } });
+            prolabores.forEach(p => { if (p.data) { const m = new Date(p.data + 'T00:00:00').getMonth(); if (m >= 0 && m < 12) saiComp[m] += p.valor; } });
+
             if (selectedMonth !== 'all') {
                 const m = parseInt(selectedMonth);
+                monthsLabels = [monthsLabels[m]];
+                entComp = [entComp[m]];
+                saiComp = [saiComp[m]];
+
                 dDespesas = dDespesas.filter(d => {
                     const dt = d.dataPagamento || d.dataVencimento;
                     return dt && new Date(dt + 'T00:00:00').getMonth() === m;
@@ -949,6 +963,30 @@
             document.getElementById('dir-kpi-saidas').textContent = formatCurrency(totalSaidas);
             document.getElementById('dir-kpi-resultado').textContent = formatCurrency(resultado);
             document.getElementById('dir-kpi-resultado').className = `text-2xl font-black mt-1 ${resultado >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            // GRÁFICO DE COLUNAS COMPARATIVO MÊS A MÊS (ENTRADAS X SAÍDAS)
+            if (charts.dirCompMensal) charts.dirCompMensal.destroy();
+            charts.dirCompMensal = new Chart(document.getElementById('dir-chart-comparativo-mensal').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: monthsLabels,
+                    datasets: [
+                        { label: 'Entradas (Faturamento)', data: entComp, backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Saídas (Custos + Pro-Labore)', data: saiComp, backgroundColor: '#eab308', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#a1a1aa' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#a1a1aa' } },
+                        y: { ticks: { color: '#a1a1aa' } }
+                    }
+                }
+            });
 
             const diretoraMap = {};
             dProlabores.forEach(p => { diretoraMap[p.diretora] = (diretoraMap[p.diretora] || 0) + p.valor; });
